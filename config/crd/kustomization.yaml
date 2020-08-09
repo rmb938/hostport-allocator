@@ -3,8 +3,8 @@
 # It should be run by config/default
 resources:
   - bases/hostport.rmb938.com_hostportclasses.yaml
-- bases/hostport.rmb938.com_hostportclaims.yaml
-- bases/hostport.rmb938.com_hostports.yaml
+  - bases/hostport.rmb938.com_hostportclaims.yaml
+  - bases/hostport.rmb938.com_hostports.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

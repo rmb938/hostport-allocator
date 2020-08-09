@@ -1,6 +1,14 @@
+GOARCH ?= $(shell go env GOARCH)
+ifeq ($(GOARCH), arm)
+DOCKER_ARG_ARCH=armv7
+else
+DOCKER_ARG_ARCH=$(GOARCH)
+endif
 
-# Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+DOCKER_IMAGE_NAME ?= hostport-allocator
+DOCKER_REPO ?= local
+DOCKER_IMAGE_TAG  ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd"
 
@@ -18,8 +26,8 @@ test: generate fmt vet manifests
 	go test ./... -coverprofile cover.out
 
 # Build manager binary
-manager: generate fmt vet
-	go build -o bin/manager main.go
+manager: fmt vet
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) go build -o bin/hostport-allocator-manager-linux-$(DOCKER_ARG_ARCH) main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -54,13 +62,33 @@ vet:
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-# Build the docker image
-docker-build: test
-	docker build . -t ${IMG}
+# Create the kind cluster
+kind:
+	kind create cluster --name hostport-allocator --kubeconfig ./kind-kubeconfig
 
-# Push the docker image
+# Delete the kind cluster
+kind-clean:
+	kind delete cluster --name hostport-allocator
+
+# Run tilt
+tilt:
+	KUBECONFIG=kind-kubeconfig tilt up --hud=true --no-browser
+
+# Remove tilt
+tilt-down:
+	KUBECONFIG=kind-kubeconfig tilt down
+
+# Build docker image
+docker:
+	docker build -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)" --build-arg ARCH=$(DOCKER_ARG_ARCH) --build-arg OS="linux" .
+
+# Tag docker image as latest
+docker-latest:
+	docker tag "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)" "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):latest-$(GOARCH)"
+
+# Push docker image
 docker-push:
-	docker push ${IMG}
+	docker push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)"
 
 # find or download controller-gen
 # download controller-gen if necessary

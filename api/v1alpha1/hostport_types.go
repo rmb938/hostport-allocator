@@ -64,7 +64,7 @@ type HostPortStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
-// +kubebuilder:printcolumn:name="PORT",type=int,JSONPath=`.status.port`,priority=0
+// +kubebuilder:printcolumn:name="PORT",type=integer,JSONPath=`.status.port`,priority=0
 // +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 
 // HostPort is the Schema for the hostports API

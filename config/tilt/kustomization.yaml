@@ -1,0 +1,20 @@
+bases:
+  - ../default
+
+resources: []
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: hostport-allocator-controller-manager
+      namespace: hostport-allocator-system
+    spec:
+      strategy:
+        type: Recreate
+      template:
+        spec:
+          containers:
+            - name: manager
+              args: []

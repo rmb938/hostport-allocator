@@ -31,14 +31,14 @@ type PortPool struct {
 
 	// The start port for the pool
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Minimum:=1
-	// +kubebuilder:validation:Maximum:=65535
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
 	Start int `json:"start"`
 
 	// The end port for the pool
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Minimum:=1
-	// +kubebuilder:validation:Maximum:=65535
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
 	End int `json:"end"`
 }
 
@@ -49,7 +49,7 @@ type HostPortClassSpec struct {
 
 	// A list of pools
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems:=1
+	// +kubebuilder:validation:MinItems=1
 	Pool []PortPool `json:"pool"`
 }
 
