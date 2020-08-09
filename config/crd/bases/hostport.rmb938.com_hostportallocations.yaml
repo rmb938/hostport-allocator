@@ -36,10 +36,11 @@ spec:
         spec:
           description: HostPortAllocationSpec defines the desired state of HostPortAllocation
           properties:
-            pool:
+            class:
+              description: The class to use for this allocation
               type: string
           required:
-          - pool
+          - class
           type: object
         status:
           description: HostPortAllocationStatus defines the observed state of HostPortAllocation

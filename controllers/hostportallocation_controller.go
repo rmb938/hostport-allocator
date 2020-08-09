@@ -47,6 +47,13 @@ func (r *HostPortAllocationReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 }
 
 func (r *HostPortAllocationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(&hostportv1alpha1.HostPortAllocation{}, "spec.class", func(rawObj runtime.Object) []string {
+		hpa := rawObj.(*hostportv1alpha1.HostPortAllocation)
+		return []string{hpa.Spec.Class}
+	}); err != nil {
+		return err
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPortAllocation{}).
 		Complete(r)

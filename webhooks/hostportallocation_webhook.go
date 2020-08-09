@@ -84,8 +84,16 @@ func (w *HostPortAllocationWebhook) ValidateUpdate(obj runtime.Object, old runti
 	r := obj.(*hostportv1alpha1.HostPortAllocation)
 
 	hostportallocationlog.Info("validate update", "name", r.Name)
+	oldHPA := old.(*hostportv1alpha1.HostPortAllocation)
 
 	var allErrs field.ErrorList
+
+	if r.Spec.Class != oldHPA.Spec.Class {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("spec").Child("class"),
+				"cannot change the port allocation class"),
+		)
+	}
 
 	if len(allErrs) == 0 {
 		return nil

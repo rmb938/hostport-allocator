@@ -30,8 +30,9 @@ type HostPortAllocationSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// The class to use for this allocation
 	// +kubebuilder:validation:Required
-	Pool string `json:"pool"`
+	Class string `json:"class"`
 }
 
 // HostPortAllocationStatus defines the observed state of HostPortAllocation
