@@ -5,9 +5,6 @@ resources:
   kind: HostPortClass
   version: v1alpha1
 - group: hostport
-  kind: HostPortAllocation
-  version: v1alpha1
-- group: hostport
   kind: HostPortClaim
   version: v1alpha1
 - group: hostport
