@@ -9,7 +9,7 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportallocations
+  - hostportclaims
   verbs:
   - create
   - delete
@@ -21,7 +21,7 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportallocations/status
+  - hostportclaims/status
   verbs:
   - get
   - patch
@@ -42,6 +42,26 @@ rules:
   - hostport.rmb938.com
   resources:
   - hostportclasses/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostports
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostports/status
   verbs:
   - get
   - patch

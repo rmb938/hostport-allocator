@@ -6,20 +6,29 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
-  name: hostportallocations.hostport.rmb938.com
+  name: hostportclaims.hostport.rmb938.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: STATUS
+    type: string
+  - JSONPath: .spec.hostPortClassName
+    name: HOSTPORTCLASS
+    type: string
   group: hostport.rmb938.com
   names:
-    kind: HostPortAllocation
-    listKind: HostPortAllocationList
-    plural: hostportallocations
-    singular: hostportallocation
+    kind: HostPortClaim
+    listKind: HostPortClaimList
+    plural: hostportclaims
+    shortNames:
+    - hpc
+    singular: hostportclaim
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: HostPortAllocation is the Schema for the hostportallocations API
+      description: HostPortClaim is the Schema for the hostportclaims API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -34,16 +43,19 @@ spec:
         metadata:
           type: object
         spec:
-          description: HostPortAllocationSpec defines the desired state of HostPortAllocation
+          description: HostPortClaimSpec defines the desired state of HostPortClaim
           properties:
-            class:
-              description: The class to use for this allocation
+            hostPortClassName:
+              description: The host port class
+              type: string
+            hostPortName:
+              description: The binding reference to the HostPort backing this claim
               type: string
           required:
-          - class
+          - hostPortClassName
           type: object
         status:
-          description: HostPortAllocationStatus defines the observed state of HostPortAllocation
+          description: HostPortClaimStatus defines the observed state of HostPortClaim
           properties:
             conditions:
               description: Resource status conditions
@@ -105,9 +117,8 @@ spec:
                 - type
                 type: object
               type: array
-            port:
-              description: The port allocated
-              type: integer
+            phase:
+              type: string
           type: object
       type: object
   version: v1alpha1

@@ -25,18 +25,24 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// HostPortAllocationSpec defines the desired state of HostPortAllocation
-type HostPortAllocationSpec struct {
+// HostPortClaimSpec defines the desired state of HostPortClaim
+type HostPortClaimSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// The class to use for this allocation
+	// The host port class
 	// +kubebuilder:validation:Required
-	Class string `json:"class"`
+	HostPortClassName string `json:"hostPortClassName"`
+
+	// The binding reference to the HostPort backing this claim
+	// +kubebuilder:validation:Optional
+	HostPortName string `json:"hostPortName"`
 }
 
-// HostPortAllocationStatus defines the observed state of HostPortAllocation
-type HostPortAllocationStatus struct {
+type HostPortClaimStatusPhase string
+
+// HostPortClaimStatus defines the observed state of HostPortClaim
+type HostPortClaimStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -44,36 +50,38 @@ type HostPortAllocationStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
-	// The port allocated
 	// +kubebuilder:validation:Optional
-	Port *int `json:"port,omitempty"`
+	Phase HostPortClaimStatusPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:resource:shortName=hpc
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
+// +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 
-// HostPortAllocation is the Schema for the hostportallocations API
-type HostPortAllocation struct {
+// HostPortClaim is the Schema for the hostportclaims API
+type HostPortClaim struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec HostPortAllocationSpec `json:"spec,omitempty"`
+	Spec HostPortClaimSpec `json:"spec,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Status HostPortAllocationStatus `json:"status,omitempty"`
+	Status HostPortClaimStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// HostPortAllocationList contains a list of HostPortAllocation
-type HostPortAllocationList struct {
+// HostPortClaimList contains a list of HostPortClaim
+type HostPortClaimList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HostPortAllocation `json:"items"`
+	Items           []HostPortClaim `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HostPortAllocation{}, &HostPortAllocationList{})
+	SchemeBuilder.Register(&HostPortClaim{}, &HostPortClaimList{})
 }

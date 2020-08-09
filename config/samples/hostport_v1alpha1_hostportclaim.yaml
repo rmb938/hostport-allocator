@@ -1,7 +1,7 @@
 apiVersion: hostport.rmb938.com/v1alpha1
-kind: HostPortAllocation
+kind: HostPortClaim
 metadata:
-  name: hostportallocation-sample
+  name: hostportclaim-sample
 spec:
   # Add fields here
   foo: bar

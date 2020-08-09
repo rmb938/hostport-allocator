@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	intmetav1 "github.com/rmb938/hostport-allocator/apis/meta/v1"
@@ -25,38 +26,23 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-type PortPool struct {
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
-
-	// The start port for the pool
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Minimum:=1
-	// +kubebuilder:validation:Maximum:=65535
-	Start int `json:"start"`
-
-	// The end port for the pool
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Minimum:=1
-	// +kubebuilder:validation:Maximum:=65535
-	End int `json:"end"`
-}
-
-// HostPortClassSpec defines the desired state of HostPortClass
-type HostPortClassSpec struct {
+// HostPortSpec defines the desired state of HostPort
+type HostPortSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// A list of pools
+	// The referencing claim
+	// +kubebuilder:validation:Optional
+	ClaimRef *v1.ObjectReference `json:"claimRef,omitempty"`
+
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems:=1
-	Pool []PortPool `json:"pool"`
+	HostPortClassName string `json:"hostPortClassName"`
 }
 
-type HostPortClassStatusPhase string
+type HostPortStatusPhase string
 
-// HostPortClassStatus defines the observed state of HostPortClass
-type HostPortClassStatus struct {
+// HostPortStatus defines the observed state of HostPort
+type HostPortStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -64,38 +50,44 @@ type HostPortClassStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
+	// The port that was allocated by the HostPortClass
 	// +kubebuilder:validation:Optional
-	Phase HostPortClassStatusPhase `json:"phase,omitempty"`
+	Port *int `json:"port"`
+
+	// +kubebuilder:validation:Optional
+	Phase HostPortStatusPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:shortName=hpcl
+// +kubebuilder:resource:shortName=hp
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
+// +kubebuilder:printcolumn:name="PORT",type=int,JSONPath=`.status.port`,priority=0
+// +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 
-// HostPortClass is the Schema for the hostportclasses API
-type HostPortClass struct {
+// HostPort is the Schema for the hostports API
+type HostPort struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec HostPortClassSpec `json:"spec,omitempty"`
+	Spec HostPortSpec `json:"spec,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Status HostPortClassStatus `json:"status,omitempty"`
+	Status HostPortStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// HostPortClassList contains a list of HostPortClass
-type HostPortClassList struct {
+// HostPortList contains a list of HostPort
+type HostPortList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HostPortClass `json:"items"`
+	Items           []HostPort `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HostPortClass{}, &HostPortClassList{})
+	SchemeBuilder.Register(&HostPort{}, &HostPortList{})
 }

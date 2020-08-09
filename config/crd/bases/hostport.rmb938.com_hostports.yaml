@@ -6,24 +6,30 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
-  name: hostportclasses.hostport.rmb938.com
+  name: hostports.hostport.rmb938.com
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
     name: STATUS
     type: string
+  - JSONPath: .status.port
+    name: PORT
+    type: int
+  - JSONPath: .spec.hostPortClassName
+    name: HOSTPORTCLASS
+    type: string
   group: hostport.rmb938.com
   names:
-    kind: HostPortClass
-    listKind: HostPortClassList
-    plural: hostportclasses
-    singular: hostportclass
+    kind: HostPort
+    listKind: HostPortList
+    plural: hostports
+    singular: hostport
   scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: HostPortClass is the Schema for the hostportclasses API
+      description: HostPort is the Schema for the hostports API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -38,36 +44,51 @@ spec:
         metadata:
           type: object
         spec:
-          description: HostPortClassSpec defines the desired state of HostPortClass
+          description: HostPortSpec defines the desired state of HostPort
           properties:
-            pool:
-              description: A list of pools
-              items:
-                properties:
-                  end:
-                    description: The end port for the pool
-                    maximum: 65535
-                    minimum: 1
-                    type: integer
-                  name:
-                    type: string
-                  start:
-                    description: The start port for the pool
-                    maximum: 65535
-                    minimum: 1
-                    type: integer
-                required:
-                - end
-                - name
-                - start
-                type: object
-              minItems: 1
-              type: array
+            claimRef:
+              description: The referencing claim
+              properties:
+                apiVersion:
+                  description: API version of the referent.
+                  type: string
+                fieldPath:
+                  description: 'If referring to a piece of an object instead of an
+                    entire object, this string should contain a valid JSON/Go field
+                    access statement, such as desiredState.manifest.containers[2].
+                    For example, if the object reference is to a container within
+                    a pod, this would take on a value like: "spec.containers{name}"
+                    (where "name" refers to the name of the container that triggered
+                    the event) or if no container name is specified "spec.containers[2]"
+                    (container with index 2 in this pod). This syntax is chosen only
+                    to have some well-defined way of referencing a part of an object.
+                    TODO: this design is not final and this field is subject to change
+                    in the future.'
+                  type: string
+                kind:
+                  description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                  type: string
+                name:
+                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                  type: string
+                namespace:
+                  description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                  type: string
+                resourceVersion:
+                  description: 'Specific resourceVersion to which this reference is
+                    made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                  type: string
+                uid:
+                  description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
+                  type: string
+              type: object
+            hostPortClassName:
+              type: string
           required:
-          - pool
+          - hostPortClassName
           type: object
         status:
-          description: HostPortClassStatus defines the observed state of HostPortClass
+          description: HostPortStatus defines the observed state of HostPort
           properties:
             conditions:
               description: Resource status conditions
@@ -131,6 +152,9 @@ spec:
               type: array
             phase:
               type: string
+            port:
+              description: The port that was allocated by the HostPortClass
+              type: integer
           type: object
       type: object
   version: v1alpha1

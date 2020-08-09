@@ -24,9 +24,9 @@ import (
 )
 
 // log is for logging in this package.
-var hostportallocationlog = logf.Log.WithName("hostportallocation-resource")
+var hostportclaimlog = logf.Log.WithName("hostportclaim-resource")
 
-func (r *HostPortAllocation) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (r *HostPortClaim) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
@@ -34,41 +34,41 @@ func (r *HostPortAllocation) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportallocation,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportallocations,verbs=create;update,versions=v1alpha1,name=mhostportallocation.kb.io
+// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportclaim,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclaims,verbs=create;update,versions=v1alpha1,name=mhostportclaim.kb.io
 
-var _ webhook.Defaulter = &HostPortAllocation{}
+var _ webhook.Defaulter = &HostPortClaim{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *HostPortAllocation) Default() {
-	hostportallocationlog.Info("default", "name", r.Name)
+func (r *HostPortClaim) Default() {
+	hostportclaimlog.Info("default", "name", r.Name)
 
 	// TODO(user): fill in your defaulting logic.
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportallocation,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportallocations,versions=v1alpha1,name=vhostportallocation.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportclaim,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclaims,versions=v1alpha1,name=vhostportclaim.kb.io
 
-var _ webhook.Validator = &HostPortAllocation{}
+var _ webhook.Validator = &HostPortClaim{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortAllocation) ValidateCreate() error {
-	hostportallocationlog.Info("validate create", "name", r.Name)
+func (r *HostPortClaim) ValidateCreate() error {
+	hostportclaimlog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
 	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortAllocation) ValidateUpdate(old runtime.Object) error {
-	hostportallocationlog.Info("validate update", "name", r.Name)
+func (r *HostPortClaim) ValidateUpdate(old runtime.Object) error {
+	hostportclaimlog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
 	return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortAllocation) ValidateDelete() error {
-	hostportallocationlog.Info("validate delete", "name", r.Name)
+func (r *HostPortClaim) ValidateDelete() error {
+	hostportclaimlog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
 	return nil

@@ -1,13 +1,13 @@
-# permissions for end users to edit hostportallocations.
+# permissions for end users to edit hostportclaims.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: hostportallocation-editor-role
+  name: hostportclaim-editor-role
 rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportallocations
+  - hostportclaims
   verbs:
   - create
   - delete
@@ -19,6 +19,6 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportallocations/status
+  - hostportclaims/status
   verbs:
   - get

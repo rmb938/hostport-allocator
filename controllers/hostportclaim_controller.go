@@ -27,34 +27,27 @@ import (
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
 
-// HostPortAllocationReconciler reconciles a HostPortAllocation object
-type HostPortAllocationReconciler struct {
+// HostPortClaimReconciler reconciles a HostPortClaim object
+type HostPortClaimReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportallocations,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportallocations/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclaims,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclaims/status,verbs=get;update;patch
 
-func (r *HostPortAllocationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
-	_ = r.Log.WithValues("hostportallocation", req.NamespacedName)
+	_ = r.Log.WithValues("hostportclaim", req.NamespacedName)
 
 	// your logic here
 
 	return ctrl.Result{}, nil
 }
 
-func (r *HostPortAllocationReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(&hostportv1alpha1.HostPortAllocation{}, "spec.class", func(rawObj runtime.Object) []string {
-		hpa := rawObj.(*hostportv1alpha1.HostPortAllocation)
-		return []string{hpa.Spec.Class}
-	}); err != nil {
-		return err
-	}
-
+func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&hostportv1alpha1.HostPortAllocation{}).
+		For(&hostportv1alpha1.HostPortClaim{}).
 		Complete(r)
 }

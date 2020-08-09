@@ -7,4 +7,10 @@ resources:
 - group: hostport
   kind: HostPortAllocation
   version: v1alpha1
+- group: hostport
+  kind: HostPortClaim
+  version: v1alpha1
+- group: hostport
+  kind: HostPort
+  version: v1alpha1
 version: "2"
