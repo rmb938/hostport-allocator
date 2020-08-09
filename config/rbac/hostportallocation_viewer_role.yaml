@@ -1,0 +1,20 @@
+# permissions for end users to view hostportallocations.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hostportallocation-viewer-role
+rules:
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportallocations
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportallocations/status
+  verbs:
+  - get

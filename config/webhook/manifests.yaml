@@ -1,0 +1,88 @@
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-hostport-rmb938-com-v1alpha1-hostportallocation
+  failurePolicy: Fail
+  name: mhostportallocation.kb.io
+  rules:
+  - apiGroups:
+    - hostport.rmb938.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hostportallocations
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-hostport-rmb938-com-v1alpha1-hostportpool
+  failurePolicy: Fail
+  name: mhostportpool.kb.io
+  rules:
+  - apiGroups:
+    - hostport.rmb938.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hostportpools
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-hostport-rmb938-com-v1alpha1-hostportallocation
+  failurePolicy: Fail
+  name: vhostportallocation.kb.io
+  rules:
+  - apiGroups:
+    - hostport.rmb938.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hostportallocations
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-hostport-rmb938-com-v1alpha1-hostportpool
+  failurePolicy: Fail
+  name: vhostportpool.kb.io
+  rules:
+  - apiGroups:
+    - hostport.rmb938.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hostportpools

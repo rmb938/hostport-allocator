@@ -1,0 +1,10 @@
+domain: rmb938.com
+repo: github.com/rmb938/hostport-allocator
+resources:
+- group: hostport
+  kind: HostPortPool
+  version: v1alpha1
+- group: hostport
+  kind: HostPortAllocation
+  version: v1alpha1
+version: "2"

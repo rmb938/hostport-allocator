@@ -1,0 +1,48 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportallocations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportallocations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportpools/status
+  verbs:
+  - get
+  - patch
+  - update

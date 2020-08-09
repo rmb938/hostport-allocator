@@ -1,0 +1,110 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: hostportpools.hostport.rmb938.com
+spec:
+  group: hostport.rmb938.com
+  names:
+    kind: HostPortPool
+    listKind: HostPortPoolList
+    plural: hostportpools
+    singular: hostportpool
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: HostPortPool is the Schema for the hostportpools API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: HostPortPoolSpec defines the desired state of HostPortPool
+          properties:
+            pool:
+              description: A list of pools
+              items:
+                properties:
+                  end:
+                    description: The end port for the pool
+                    maximum: 65535
+                    minimum: 1
+                    type: integer
+                  start:
+                    description: The start port for the pool
+                    maximum: 65535
+                    minimum: 1
+                    type: integer
+                required:
+                - end
+                - start
+                type: object
+              minItems: 1
+              type: array
+          required:
+          - pool
+          type: object
+        status:
+          description: HostPortPoolStatus defines the observed state of HostPortPool
+          properties:
+            conditions:
+              description: Conditions for the object
+              items:
+                properties:
+                  lastTransitionTime:
+                    description: LastTransitionTime is the timestamp corresponding
+                      to the last status change of this condition.
+                    format: date-time
+                    type: string
+                  message:
+                    description: Message is a human readable description of the details
+                      of the last transition, complementing reason.
+                    type: string
+                  reason:
+                    description: Reason is a brief machine readable explanation for
+                      the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition
+                    enum:
+                    - "True"
+                    - "False"
+                    - Error
+                    - Unknown
+                    type: string
+                  type:
+                    description: Type of the condition
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

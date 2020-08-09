@@ -1,0 +1,7 @@
+apiVersion: hostport.rmb938.com/v1alpha1
+kind: HostPortAllocation
+metadata:
+  name: hostportallocation-sample
+spec:
+  # Add fields here
+  foo: bar
