@@ -24,9 +24,9 @@ import (
 )
 
 // log is for logging in this package.
-var hostportpoollog = logf.Log.WithName("hostportpool-resource")
+var hostportclasslog = logf.Log.WithName("hostportclass-resource")
 
-func (r *HostPortPool) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (r *HostPortClass) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
 		Complete()
@@ -34,41 +34,41 @@ func (r *HostPortPool) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportpool,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportpools,verbs=create;update,versions=v1alpha1,name=mhostportpool.kb.io
+// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportclass,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclasses,verbs=create;update,versions=v1alpha1,name=mhostportclass.kb.io
 
-var _ webhook.Defaulter = &HostPortPool{}
+var _ webhook.Defaulter = &HostPortClass{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *HostPortPool) Default() {
-	hostportpoollog.Info("default", "name", r.Name)
+func (r *HostPortClass) Default() {
+	hostportclasslog.Info("default", "name", r.Name)
 
 	// TODO(user): fill in your defaulting logic.
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportpool,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportpools,versions=v1alpha1,name=vhostportpool.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportclass,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclasses,versions=v1alpha1,name=vhostportclass.kb.io
 
-var _ webhook.Validator = &HostPortPool{}
+var _ webhook.Validator = &HostPortClass{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortPool) ValidateCreate() error {
-	hostportpoollog.Info("validate create", "name", r.Name)
+func (r *HostPortClass) ValidateCreate() error {
+	hostportclasslog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
 	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortPool) ValidateUpdate(old runtime.Object) error {
-	hostportpoollog.Info("validate update", "name", r.Name)
+func (r *HostPortClass) ValidateUpdate(old runtime.Object) error {
+	hostportclasslog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
 	return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortPool) ValidateDelete() error {
-	hostportpoollog.Info("validate delete", "name", r.Name)
+func (r *HostPortClass) ValidateDelete() error {
+	hostportclasslog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
 	return nil

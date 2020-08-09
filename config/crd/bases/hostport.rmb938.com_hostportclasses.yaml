@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
-  name: hostportpools.hostport.rmb938.com
+  name: hostportclasses.hostport.rmb938.com
 spec:
   group: hostport.rmb938.com
   names:
-    kind: HostPortPool
-    listKind: HostPortPoolList
-    plural: hostportpools
-    singular: hostportpool
+    kind: HostPortClass
+    listKind: HostPortClassList
+    plural: hostportclasses
+    singular: hostportclass
   scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: HostPortPool is the Schema for the hostportpools API
+      description: HostPortClass is the Schema for the hostportclasses API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +34,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: HostPortPoolSpec defines the desired state of HostPortPool
+          description: HostPortClassSpec defines the desired state of HostPortClass
           properties:
             pool:
               description: A list of pools
@@ -45,6 +45,8 @@ spec:
                     maximum: 65535
                     minimum: 1
                     type: integer
+                  name:
+                    type: string
                   start:
                     description: The start port for the pool
                     maximum: 65535
@@ -52,6 +54,7 @@ spec:
                     type: integer
                 required:
                 - end
+                - name
                 - start
                 type: object
               minItems: 1
@@ -60,7 +63,7 @@ spec:
           - pool
           type: object
         status:
-          description: HostPortPoolStatus defines the observed state of HostPortPool
+          description: HostPortClassStatus defines the observed state of HostPortClass
           properties:
             conditions:
               description: Resource status conditions

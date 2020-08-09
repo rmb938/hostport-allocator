@@ -2,7 +2,7 @@ domain: rmb938.com
 repo: github.com/rmb938/hostport-allocator
 resources:
 - group: hostport
-  kind: HostPortPool
+  kind: HostPortClass
   version: v1alpha1
 - group: hostport
   kind: HostPortAllocation

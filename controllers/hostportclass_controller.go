@@ -27,27 +27,27 @@ import (
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
 
-// HostPortPoolReconciler reconciles a HostPortPool object
-type HostPortPoolReconciler struct {
+// HostPortClassReconciler reconciles a HostPortClass object
+type HostPortClassReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportpools,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportpools/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclasses,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclasses/status,verbs=get;update;patch
 
-func (r *HostPortPoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *HostPortClassReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
-	_ = r.Log.WithValues("hostportpool", req.NamespacedName)
+	_ = r.Log.WithValues("hostportclass", req.NamespacedName)
 
 	// your logic here
 
 	return ctrl.Result{}, nil
 }
 
-func (r *HostPortPoolReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *HostPortClassReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&hostportv1alpha1.HostPortPool{}).
+		For(&hostportv1alpha1.HostPortClass{}).
 		Complete(r)
 }

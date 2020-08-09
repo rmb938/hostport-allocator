@@ -1,0 +1,24 @@
+# permissions for end users to edit hostportclasses.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hostportclass-editor-role
+rules:
+  - apiGroups:
+      - hostport.rmb938.com
+    resources:
+      - hostportclasses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - hostport.rmb938.com
+    resources:
+      - hostportclasses/status
+    verbs:
+      - get

@@ -26,6 +26,9 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 type PortPool struct {
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
 	// The start port for the pool
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum:=1
@@ -39,8 +42,8 @@ type PortPool struct {
 	End int `json:"end"`
 }
 
-// HostPortPoolSpec defines the desired state of HostPortPool
-type HostPortPoolSpec struct {
+// HostPortClassSpec defines the desired state of HostPortClass
+type HostPortClassSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -50,8 +53,8 @@ type HostPortPoolSpec struct {
 	Pool []PortPool `json:"pool"`
 }
 
-// HostPortPoolStatus defines the observed state of HostPortPool
-type HostPortPoolStatus struct {
+// HostPortClassStatus defines the observed state of HostPortClass
+type HostPortClassStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -65,27 +68,27 @@ type HostPortPoolStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 
-// HostPortPool is the Schema for the hostportpools API
-type HostPortPool struct {
+// HostPortClass is the Schema for the hostportclasses API
+type HostPortClass struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec HostPortPoolSpec `json:"spec,omitempty"`
+	Spec HostPortClassSpec `json:"spec,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Status HostPortPoolStatus `json:"status,omitempty"`
+	Status HostPortClassStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// HostPortPoolList contains a list of HostPortPool
-type HostPortPoolList struct {
+// HostPortClassList contains a list of HostPortClass
+type HostPortClassList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HostPortPool `json:"items"`
+	Items           []HostPortClass `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HostPortPool{}, &HostPortPoolList{})
+	SchemeBuilder.Register(&HostPortClass{}, &HostPortClassList{})
 }

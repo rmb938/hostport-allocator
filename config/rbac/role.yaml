@@ -29,7 +29,7 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportpools
+  - hostportclasses
   verbs:
   - create
   - delete
@@ -41,7 +41,7 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
-  - hostportpools/status
+  - hostportclasses/status
   verbs:
   - get
   - patch

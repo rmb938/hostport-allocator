@@ -28,6 +28,7 @@ import (
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 	"github.com/rmb938/hostport-allocator/controllers"
+	"github.com/rmb938/hostport-allocator/webhooks"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -66,18 +67,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.HostPortPoolReconciler{
+	if err = (&controllers.HostPortClassReconciler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("HostPortPool"),
+		Log:    ctrl.Log.WithName("controllers").WithName("HostPortClass"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "HostPortPool")
+		setupLog.Error(err, "unable to create controller", "controller", "HostPortClass")
 		os.Exit(1)
 	}
-	if err = (&hostportv1alpha1.HostPortPool{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortPool")
-		os.Exit(1)
-	}
+	(&webhooks.HostPortClassWebhook{}).SetupWebhookWithManager(mgr)
 	if err = (&controllers.HostPortAllocationReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("HostPortAllocation"),
@@ -86,10 +84,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPortAllocation")
 		os.Exit(1)
 	}
-	if err = (&hostportv1alpha1.HostPortAllocation{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortAllocation")
-		os.Exit(1)
-	}
+	(&webhooks.HostPortAllocationWebhook{}).SetupWebhookWithManager(mgr)
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")

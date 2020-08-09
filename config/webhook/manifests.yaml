@@ -29,9 +29,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-hostport-rmb938-com-v1alpha1-hostportpool
+      path: /mutate-hostport-rmb938-com-v1alpha1-hostportclass
   failurePolicy: Fail
-  name: mhostportpool.kb.io
+  name: mhostportclass.kb.io
   rules:
   - apiGroups:
     - hostport.rmb938.com
@@ -41,7 +41,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - hostportpools
+    - hostportclasses
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -73,9 +73,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-hostport-rmb938-com-v1alpha1-hostportpool
+      path: /validate-hostport-rmb938-com-v1alpha1-hostportclass
   failurePolicy: Fail
-  name: vhostportpool.kb.io
+  name: vhostportclass.kb.io
   rules:
   - apiGroups:
     - hostport.rmb938.com
@@ -85,4 +85,4 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - hostportpools
+    - hostportclasses
