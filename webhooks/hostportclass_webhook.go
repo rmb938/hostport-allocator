@@ -18,7 +18,6 @@ package webhooks
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -51,7 +50,6 @@ func (w *HostPortClassWebhook) SetupWebhookWithManager(mgr ctrl.Manager) {
 
 var _ webhook.Defaulter = &HostPortClassWebhook{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
 func (w *HostPortClassWebhook) Default(obj runtime.Object) {
 	r := obj.(*hostportv1alpha1.HostPortClass)
 
@@ -62,57 +60,13 @@ func (w *HostPortClassWebhook) Default(obj runtime.Object) {
 
 var _ webhook.Validator = &HostPortClassWebhook{}
 
-func (w *HostPortClassWebhook) validatePool(r *hostportv1alpha1.HostPortClass) field.ErrorList {
-	var allErrs field.ErrorList
-
-	for i, p1 := range r.Spec.Pool {
-		name := p1.Name
-		start := p1.Start
-		end := p1.End
-		if end < start {
-			allErrs = append(allErrs, field.Invalid(
-				field.NewPath("spec").Child("pool").Index(i), end,
-				"pool end must be greater than or equal to pool start"),
-			)
-		}
-
-		dupNames := 0
-
-		for _, p2 := range r.Spec.Pool {
-			if name == p2.Name {
-				dupNames += 1
-
-				// this duplicate is us (or an exact copy of us) so don't do other checks
-				if start == p2.Start && end == p2.End {
-					continue
-				}
-			}
-
-			if (start >= p2.Start && start <= p2.End) || end >= p2.Start && end <= p2.End {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("pool").Index(i), r.Spec.Pool[i],
-					fmt.Sprintf("pool contains ports that are already defined in pool %s", p2.Name)),
-				)
-			}
-		}
-
-		// we will always find our self so look for > 1
-		if dupNames > 1 {
-			allErrs = append(allErrs, field.Duplicate(
-				field.NewPath("spec").Child("pool").Index(i).Key("name"), name),
-			)
-		}
-	}
-
-	return allErrs
-}
-
 func (w *HostPortClassWebhook) ValidateCreate(obj runtime.Object) error {
 	_ = context.Background()
 	r := obj.(*hostportv1alpha1.HostPortClass)
 
 	hostportclasslog.Info("validate create", "name", r.Name)
 
-	allErrs := w.validatePool(r)
+	var allErrs field.ErrorList
 
 	if len(allErrs) == 0 {
 		return nil
@@ -131,11 +85,7 @@ func (w *HostPortClassWebhook) ValidateUpdate(obj runtime.Object, old runtime.Ob
 	hostportclasslog.Info("validate update", "name", r.Name)
 	_ = old.(*hostportv1alpha1.HostPortClass)
 
-	allErrs := w.validatePool(r)
-
-	// TODO: how do we handle changing pools
-	//  i.e removing existing pools
-	//  i.e modifying existing pools
+	var allErrs field.ErrorList
 
 	if len(allErrs) == 0 {
 		return nil

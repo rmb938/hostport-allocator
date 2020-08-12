@@ -10,4 +10,7 @@ resources:
 - group: hostport
   kind: HostPort
   version: v1alpha1
+- group: hostport
+  kind: HostPortPool
+  version: v1alpha1
 version: "2"

@@ -49,6 +49,26 @@ rules:
 - apiGroups:
   - hostport.rmb938.com
   resources:
+  - hostportpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
+  - hostportpools/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - hostport.rmb938.com
+  resources:
   - hostports
   verbs:
   - create

@@ -5,6 +5,7 @@ resources:
   - bases/hostport.rmb938.com_hostportclasses.yaml
   - bases/hostport.rmb938.com_hostportclaims.yaml
   - bases/hostport.rmb938.com_hostports.yaml
+  - bases/hostport.rmb938.com_hostportpools.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -13,6 +14,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_hostportclasses.yaml
 #- patches/webhook_in_hostportclaims.yaml
 #- patches/webhook_in_hostports.yaml
+#- patches/webhook_in_hostportpools.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
@@ -20,6 +22,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_hostportclasses.yaml
 #- patches/cainjection_in_hostportclaims.yaml
 #- patches/cainjection_in_hostports.yaml
+#- patches/cainjection_in_hostportpools.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

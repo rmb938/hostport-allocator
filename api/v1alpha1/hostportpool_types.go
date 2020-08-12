@@ -25,17 +25,33 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// HostPortClassSpec defines the desired state of HostPortClass
-type HostPortClassSpec struct {
+// HostPortPoolSpec defines the desired state of HostPortPool
+type HostPortPoolSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// The host port class
+	// +kubebuilder:validation:Required
+	HostPortClassName string `json:"hostPortClassName"`
+
+	// The start port for the pool
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Start int `json:"start"`
+
+	// The end port for the pool
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	End int `json:"end"`
+
+	// +kubebuilder:validation:Required
+	Enabled bool `json:"enabled"`
 }
 
-type HostPortClassStatusPhase string
-
-// HostPortClassStatus defines the observed state of HostPortClass
-type HostPortClassStatus struct {
+// HostPortPoolStatus defines the observed state of HostPortPool
+type HostPortPoolStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -48,33 +64,33 @@ type HostPortClassStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:shortName=hpcl
+// +kubebuilder:resource:shortName=hpp
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 
-// HostPortClass is the Schema for the hostportclasses API
-type HostPortClass struct {
+// HostPortPool is the Schema for the hostportpools API
+type HostPortPool struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec HostPortClassSpec `json:"spec,omitempty"`
+	Spec HostPortPoolSpec `json:"spec,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Status HostPortClassStatus `json:"status,omitempty"`
+	Status HostPortPoolStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// HostPortClassList contains a list of HostPortClass
-type HostPortClassList struct {
+// HostPortPoolList contains a list of HostPortPool
+type HostPortPoolList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HostPortClass `json:"items"`
+	Items           []HostPortPool `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HostPortClass{}, &HostPortClassList{})
+	SchemeBuilder.Register(&HostPortPool{}, &HostPortPoolList{})
 }

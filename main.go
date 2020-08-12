@@ -94,6 +94,15 @@ func main() {
 		os.Exit(1)
 	}
 	(&webhooks.HostPortWebhook{}).SetupWebhookWithManager(mgr)
+	if err = (&controllers.HostPortPoolReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("HostPortPool"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "HostPortPool")
+		os.Exit(1)
+	}
+	(&webhooks.HostPortPoolWebhook{}).SetupWebhookWithManager(mgr)
 	// +kubebuilder:scaffold:builder
 
 	signalHandler := ctrl.SetupSignalHandler()

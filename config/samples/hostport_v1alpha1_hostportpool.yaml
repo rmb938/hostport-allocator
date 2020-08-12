@@ -1,0 +1,7 @@
+apiVersion: hostport.rmb938.com/v1alpha1
+kind: HostPortPool
+metadata:
+  name: hostportpool-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -50,7 +50,6 @@ func (w *HostPortClaimWebhook) SetupWebhookWithManager(mgr ctrl.Manager) {
 
 var _ webhook.Defaulter = &HostPortClaimWebhook{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
 func (w *HostPortClaimWebhook) Default(obj runtime.Object) {
 	r := obj.(*hostportv1alpha1.HostPortClass)
 

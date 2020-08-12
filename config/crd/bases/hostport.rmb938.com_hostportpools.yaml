@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: hostportclasses.hostport.rmb938.com
+  name: hostportpools.hostport.rmb938.com
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.phase
@@ -14,16 +14,16 @@ spec:
     type: string
   group: hostport.rmb938.com
   names:
-    kind: HostPortClass
-    listKind: HostPortClassList
-    plural: hostportclasses
-    singular: hostportclass
+    kind: HostPortPool
+    listKind: HostPortPoolList
+    plural: hostportpools
+    singular: hostportpool
   scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: HostPortClass is the Schema for the hostportclasses API
+      description: HostPortPool is the Schema for the hostportpools API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -38,10 +38,31 @@ spec:
         metadata:
           type: object
         spec:
-          description: HostPortClassSpec defines the desired state of HostPortClass
+          description: HostPortPoolSpec defines the desired state of HostPortPool
+          properties:
+            enabled:
+              type: boolean
+            end:
+              description: The end port for the pool
+              maximum: 65535
+              minimum: 1
+              type: integer
+            hostPortClassName:
+              description: The host port class
+              type: string
+            start:
+              description: The start port for the pool
+              maximum: 65535
+              minimum: 1
+              type: integer
+          required:
+          - enabled
+          - end
+          - hostPortClassName
+          - start
           type: object
         status:
-          description: HostPortClassStatus defines the observed state of HostPortClass
+          description: HostPortPoolStatus defines the observed state of HostPortPool
           properties:
             conditions:
               description: Resource status conditions
