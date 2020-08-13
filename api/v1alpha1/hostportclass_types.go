@@ -18,8 +18,6 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	intmetav1 "github.com/rmb938/hostport-allocator/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -38,13 +36,6 @@ type HostPortClassStatusPhase string
 type HostPortClassStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// Resource status conditions
-	// +kubebuilder:validation:Optional
-	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
-
-	// +kubebuilder:validation:Optional
-	Phase HostPortClassStatusPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
