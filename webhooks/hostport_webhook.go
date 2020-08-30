@@ -52,11 +52,24 @@ var _ webhook.Defaulter = &HostPortWebhook{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (w *HostPortWebhook) Default(obj runtime.Object) {
-	r := obj.(*hostportv1alpha1.HostPortClass)
+	r := obj.(*hostportv1alpha1.HostPort)
 
 	hostportlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.DeletionTimestamp.IsZero() {
+		hasFinalizer := false
+
+		for _, finalizer := range r.Finalizers {
+			if finalizer == hostportv1alpha1.HostPortFinalizer {
+				hasFinalizer = true
+				break
+			}
+		}
+
+		if hasFinalizer == false {
+			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortFinalizer)
+		}
+	}
 }
 
 var _ webhook.Validator = &HostPortWebhook{}
@@ -95,10 +108,17 @@ func (w *HostPortWebhook) ValidateUpdate(obj runtime.Object, old runtime.Object)
 		)
 	}
 
-	if oldHP.Status.Port != nil && r.Status.Port != oldHP.Status.Port {
+	if oldHP.Status.Port != nil && *r.Status.Port != *oldHP.Status.Port {
 		allErrs = append(allErrs,
 			field.Forbidden(field.NewPath("status").Child("port"),
 				"cannot change port"),
+		)
+	}
+
+	if oldHP.Status.HostPortPoolName != nil && *r.Status.HostPortPoolName != *oldHP.Status.HostPortPoolName {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("status").Child("hostPortPoolName"),
+				"cannot change hostPortPoolName"),
 		)
 	}
 

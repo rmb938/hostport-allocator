@@ -78,7 +78,7 @@ func (r *HostPortPoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		}
 
 		hostPorts := &hostportv1alpha1.HostPortList{}
-		err := r.List(ctx, hostPorts, client.MatchingFields{"spec.hostPortClassName": hpp.Spec.HostPortClassName})
+		err := r.List(ctx, hostPorts, client.MatchingFields{"spec.hostPortPoolName": hpp.Name})
 		if err != nil {
 			return ctrl.Result{}, err
 		}

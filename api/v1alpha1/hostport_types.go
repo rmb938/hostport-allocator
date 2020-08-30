@@ -23,6 +23,17 @@ import (
 	intmetav1 "github.com/rmb938/hostport-allocator/apis/meta/v1"
 )
 
+var HostPortFinalizer = "hostport." + GroupVersion.Group
+
+type HostPortPhase string
+
+const (
+	HostPortPhasePending   HostPortPhase = "Pending"
+	HostPortPhaseAllocated HostPortPhase = "Allocated"
+
+	HostPortPhaseDeleting HostPortPhase = "Deleting"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -39,8 +50,6 @@ type HostPortSpec struct {
 	HostPortClassName string `json:"hostPortClassName"`
 }
 
-type HostPortStatusPhase string
-
 // HostPortStatus defines the observed state of HostPort
 type HostPortStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -52,23 +61,28 @@ type HostPortStatus struct {
 
 	// The pool that the port was allocated from
 	// +kubebuilder:validation:Optional
-	HostPortPoolName string `json:"postPortPoolName"`
+	// +nullable
+	HostPortPoolName *string `json:"hostPortPoolName"`
 
 	// The port that was allocated by the HostPortClass
+	// +nullable
 	// +kubebuilder:validation:Optional
-	Port *int `json:"port"`
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Port *int64 `json:"port"`
 
 	// +kubebuilder:validation:Optional
-	Phase HostPortStatusPhase `json:"phase,omitempty"`
+	Phase HostPortPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster,shortName=hp
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="CLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
+// +kubebuilder:printcolumn:name="POOL",type=string,JSONPath=`.status.hostPortPoolName`,priority=0
 // +kubebuilder:printcolumn:name="PORT",type=integer,JSONPath=`.status.port`,priority=0
-// +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 
 // HostPort is the Schema for the hostports API
 type HostPort struct {

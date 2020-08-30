@@ -396,9 +396,14 @@ func (in *HostPortStatus) DeepCopyInto(out *HostPortStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.HostPortPoolName != nil {
+		in, out := &in.HostPortPoolName, &out.HostPortPoolName
+		*out = new(string)
+		**out = **in
+	}
 	if in.Port != nil {
 		in, out := &in.Port, &out.Port
-		*out = new(int)
+		*out = new(int64)
 		**out = **in
 	}
 }
