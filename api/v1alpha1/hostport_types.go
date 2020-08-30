@@ -50,6 +50,10 @@ type HostPortStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
+	// The pool that the port was allocated from
+	// +kubebuilder:validation:Optional
+	HostPortPoolName string `json:"postPortPoolName"`
+
 	// The port that was allocated by the HostPortClass
 	// +kubebuilder:validation:Optional
 	Port *int `json:"port"`

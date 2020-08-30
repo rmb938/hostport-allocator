@@ -17,7 +17,10 @@ limitations under the License.
 package webhooks
 
 import (
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -49,7 +52,20 @@ func (w *HostPortPoolWebhook) Default(obj runtime.Object) {
 
 	hostportpoollog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.DeletionTimestamp.IsZero() {
+		hasFinalizer := false
+
+		for _, finalizer := range r.Finalizers {
+			if finalizer == hostportv1alpha1.HostPortPoolFinalizer {
+				hasFinalizer = true
+				break
+			}
+		}
+
+		if hasFinalizer == false {
+			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortPoolFinalizer)
+		}
+	}
 }
 
 var _ webhook.Validator = &HostPortPoolWebhook{}
@@ -59,17 +75,52 @@ func (w *HostPortPoolWebhook) ValidateCreate(obj runtime.Object) error {
 
 	hostportpoollog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	var allErrs field.ErrorList
+
+	if r.Spec.Start >= r.Spec.End {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("end"), r.Spec.End,
+			"End must be larger than start"))
+	}
+
+	if len(allErrs) == 0 {
+		return nil
+	}
+
+	return apierrors.NewInvalid(
+		schema.GroupKind{Group: hostportv1alpha1.GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 func (w *HostPortPoolWebhook) ValidateUpdate(obj runtime.Object, old runtime.Object) error {
+	oldHPP := old.(*hostportv1alpha1.HostPortPool)
 	r := obj.(*hostportv1alpha1.HostPortPool)
 
 	hostportpoollog.Info("validate update", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	var allErrs field.ErrorList
+
+	if oldHPP.Spec.HostPortClassName != r.Spec.HostPortClassName {
+		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec").Child("hostPortClassName"),
+			"Cannot change hostPortClassName"))
+	}
+
+	if oldHPP.Spec.Start != r.Spec.Start {
+		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec").Child("start"),
+			"Cannot change start"))
+	}
+
+	if oldHPP.Spec.End != r.Spec.End {
+		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec").Child("end"),
+			"Cannot change end"))
+	}
+
+	if len(allErrs) == 0 {
+		return nil
+	}
+
+	return apierrors.NewInvalid(
+		schema.GroupKind{Group: hostportv1alpha1.GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 func (w *HostPortPoolWebhook) ValidateDelete(obj runtime.Object) error {

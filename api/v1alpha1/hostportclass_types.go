@@ -30,8 +30,6 @@ type HostPortClassSpec struct {
 
 }
 
-type HostPortClassStatusPhase string
-
 // HostPortClassStatus defines the observed state of HostPortClass
 type HostPortClassStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster

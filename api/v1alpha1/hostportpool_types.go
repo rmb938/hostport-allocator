@@ -25,6 +25,26 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+var HostPortPoolFinalizer = "hostportpool." + GroupVersion.Group
+
+type HostPortPoolPhase string
+
+const (
+	HostPortPoolPhasePending  HostPortPoolPhase = "Pending"
+	HostPortPoolPhaseReady    HostPortPoolPhase = "Ready"
+	HostPortPoolPhaseDeleting HostPortPoolPhase = "Deleting"
+)
+
+const (
+	HostPortPoolConditionOverlap string = "Overlap"
+
+	HostPortPoolConditionOverlapReasonNotChecked string = "NotChecked"
+	HostPortPoolConditionOverlapReasonOverlap    string = "Overlap"
+	HostPortPoolConditionOverlapReasonNoOverlap  string = "NoOverlap"
+
+	HostPortPoolConditionOverlapMessageOverlap string = "Port pool overlaps an existing port pool"
+)
+
 // HostPortPoolSpec defines the desired state of HostPortPool
 type HostPortPoolSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -60,7 +80,7 @@ type HostPortPoolStatus struct {
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Phase HostPortClassStatusPhase `json:"phase,omitempty"`
+	Phase HostPortPoolPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
