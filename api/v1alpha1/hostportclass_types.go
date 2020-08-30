@@ -20,6 +20,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var HostPortClassFinalizer = "hostportclass." + GroupVersion.Group
+
+type HostPortClassPhase string
+
+const (
+	HostPortClassPhasePending  HostPortClassPhase = "Pending"
+	HostPortClassPhaseReady    HostPortClassPhase = "Ready"
+	HostPortClassPhaseDeleting HostPortClassPhase = "Deleting"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -34,11 +44,13 @@ type HostPortClassSpec struct {
 type HostPortClassStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// +kubebuilder:validation:Optional
+	Phase HostPortClassPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:shortName=hpcl
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Cluster,shortName=hpcl
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0

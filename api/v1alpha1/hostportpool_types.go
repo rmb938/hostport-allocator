@@ -84,10 +84,13 @@ type HostPortPoolStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:shortName=hpp
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Cluster,shortName=hpp
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="CLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
+// +kubebuilder:printcolumn:name="START",type=string,JSONPath=`.spec.start`,priority=0
+// +kubebuilder:printcolumn:name="END",type=string,JSONPath=`.spec.end`,priority=0
+// +kubebuilder:printcolumn:name="ENABLED",type=string,JSONPath=`.spec.enabled`,priority=0
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 
 // HostPortPool is the Schema for the hostportpools API

@@ -43,8 +43,6 @@ func (r *HostPortPoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 	ctx := context.Background()
 	_ = r.Log.WithValues("hostportpool", req.NamespacedName)
 
-	// your logic here
-
 	hpp := &hostportv1alpha1.HostPortPool{}
 	err := r.Get(ctx, req.NamespacedName, hpp)
 	if err != nil {
@@ -88,8 +86,8 @@ func (r *HostPortPoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		// Ports exist for this pool so we can't delete it yet
 		if len(hostPorts.Items) > 0 {
 			// TODO: event saying can't delete due to existing host ports
-			// Has finalizer but host ports are still using this so requeue
-			return ctrl.Result{Requeue: true}, nil
+			// Has finalizer but host ports are still using this, we will auto re-reconcile when ports do
+			return ctrl.Result{}, nil
 		}
 
 		// remove the finalizer to delete the pool
@@ -209,6 +207,13 @@ func (r *HostPortPoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 }
 
 func (r *HostPortPoolReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(&hostportv1alpha1.HostPortPool{}, "spec.hostPortClassName", func(rawObj runtime.Object) []string {
+		hpp := rawObj.(*hostportv1alpha1.HostPortPool)
+		return []string{hpp.Spec.HostPortClassName}
+	}); err != nil {
+		return err
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPortPool{}).
 		Complete(r)

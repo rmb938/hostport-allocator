@@ -1,7 +1,10 @@
 apiVersion: hostport.rmb938.com/v1alpha1
 kind: HostPortPool
 metadata:
-  name: hostportpool-sample
+  name: sample
 spec:
-  # Add fields here
-  foo: bar
+  hostPortClassName: sample
+  start: 8000
+  end: 9000
+  enabled: true
+

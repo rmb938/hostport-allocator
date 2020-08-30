@@ -23,6 +23,8 @@ spec:
     kind: HostPort
     listKind: HostPortList
     plural: hostports
+    shortNames:
+    - hp
     singular: hostport
   scope: Cluster
   subresources:

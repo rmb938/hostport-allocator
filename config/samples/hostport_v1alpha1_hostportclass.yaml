@@ -1,7 +1,4 @@
 apiVersion: hostport.rmb938.com/v1alpha1
 kind: HostPortClass
 metadata:
-  name: hostportclass-sample
-spec:
-  # Add fields here
-  foo: bar
+  name: sample

@@ -55,7 +55,20 @@ func (w *HostPortClassWebhook) Default(obj runtime.Object) {
 
 	hostportclasslog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.DeletionTimestamp.IsZero() {
+		hasFinalizer := false
+
+		for _, finalizer := range r.Finalizers {
+			if finalizer == hostportv1alpha1.HostPortClassFinalizer {
+				hasFinalizer = true
+				break
+			}
+		}
+
+		if hasFinalizer == false {
+			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortClassFinalizer)
+		}
+	}
 }
 
 var _ webhook.Validator = &HostPortClassWebhook{}
