@@ -20,3 +20,8 @@ spec:
       ports:
         - name: web
           containerPort: 8080
+      env:
+        - name: MY_HOST_PORT
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['port.hostport.rmb938.com/web']
