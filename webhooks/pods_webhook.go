@@ -72,7 +72,7 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 	for containerIndex, container := range r.Spec.Containers {
 		for portIndex, port := range container.Ports {
 			path := field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("name")
-			if len(definedClaims) != 0 {
+			if len(definedClaims) > 0 {
 				if len(port.Name) == 0 {
 					allErrs = append(allErrs, field.Invalid(path, port.Name,
 						"Port name must be set"))
@@ -81,14 +81,13 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 				if _, ok := portNames[port.Name]; ok {
 					allErrs = append(allErrs, field.Duplicate(path, port.Name))
 				}
+				portNames[port.Name] = struct{ containerIndex, portIndex int }{containerIndex: containerIndex, portIndex: portIndex}
 			}
 
 			if _, ok := definedClaims[port.Name]; !ok && port.HostPort > 0 {
 				allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("hostPort"), port.HostPort,
 					"host ports cannot be set"))
 			}
-
-			portNames[port.Name] = struct{ containerIndex, portIndex int }{containerIndex: containerIndex, portIndex: portIndex}
 		}
 	}
 
