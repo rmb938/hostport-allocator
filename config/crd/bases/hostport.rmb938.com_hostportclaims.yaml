@@ -15,6 +15,9 @@ spec:
   - JSONPath: .spec.hostPortClassName
     name: HOSTPORTCLASS
     type: string
+  - JSONPath: .status.hostPortName
+    name: HOSTPORT
+    type: string
   group: hostport.rmb938.com
   names:
     kind: HostPortClaim
@@ -47,9 +50,6 @@ spec:
           properties:
             hostPortClassName:
               description: The host port class
-              type: string
-            hostPortName:
-              description: The binding reference to the HostPort backing this claim
               type: string
           required:
           - hostPortClassName
@@ -117,6 +117,9 @@ spec:
                 - type
                 type: object
               type: array
+            hostPortName:
+              description: The binding reference to the HostPort backing this claim
+              type: string
             phase:
               type: string
           type: object

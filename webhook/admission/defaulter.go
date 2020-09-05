@@ -25,7 +25,7 @@ import (
 )
 
 type Defaulter interface {
-	Default(runtime.Object)
+	Default(runtime.Object) error
 }
 
 // DefaultingWebhookFor creates a new Webhook for Defaulting the provided type.
@@ -66,7 +66,11 @@ func (h *mutatingHandler) Handle(ctx context.Context, req admission.Request) adm
 	}
 
 	// Default the object
-	h.defaulter.Default(obj)
+	err = h.defaulter.Default(obj)
+	if err != nil {
+		return admission.Denied(err.Error())
+	}
+
 	marshalled, err := json.Marshal(obj)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)

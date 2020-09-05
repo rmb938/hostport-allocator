@@ -4,3 +4,10 @@ metadata:
   name: sample
 spec:
   hostPortClassName: sample
+---
+apiVersion: hostport.rmb938.com/v1alpha1
+kind: HostPort
+metadata:
+  name: sample2
+spec:
+  hostPortClassName: sample

@@ -8,10 +8,6 @@ metadata:
   creationTimestamp: null
   name: hostportclasses.hostport.rmb938.com
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .status.phase
-    name: STATUS
-    type: string
   group: hostport.rmb938.com
   names:
     kind: HostPortClass
@@ -41,12 +37,30 @@ spec:
           type: object
         spec:
           description: HostPortClassSpec defines the desired state of HostPortClass
+          properties:
+            pools:
+              items:
+                properties:
+                  end:
+                    description: The end port for the pool
+                    maximum: 65535
+                    minimum: 1
+                    type: integer
+                  start:
+                    description: The start port for the pool
+                    maximum: 65535
+                    minimum: 1
+                    type: integer
+                required:
+                - end
+                - start
+                type: object
+              type: array
+          required:
+          - pools
           type: object
         status:
           description: HostPortClassStatus defines the observed state of HostPortClass
-          properties:
-            phase:
-              type: string
           type: object
       type: object
   version: v1alpha1

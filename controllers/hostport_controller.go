@@ -18,18 +18,38 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/go-logr/logr"
+	"github.com/prometheus/client_golang/prometheus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
+
+var (
+	metricsHostPortInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "hostport",
+			Name:      "hostport_port",
+			Help:      "The port allocated to the hostport",
+		},
+		[]string{"name"},
+	)
+)
+
+func init() {
+	metrics.Registry.MustRegister(metricsHostPortInfo)
+}
 
 // HostPortReconciler reconciles a HostPort object
 type HostPortReconciler struct {
@@ -50,14 +70,21 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	hp := &hostportv1alpha1.HostPort{}
 	err := r.Get(ctx, req.NamespacedName, hp)
 	if err != nil {
-		err = client.IgnoreNotFound(err)
+		if apierrors.IsNotFound(err) {
+			metricsHostPortInfo.DeleteLabelValues(req.Name)
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, err
 	}
+
+	metricsHostPortInfo.With(prometheus.Labels{
+		"name": hp.Name,
+	}).Set(float64(hp.Status.Port))
 
 	// if port is deleting
 	if hp.DeletionTimestamp.IsZero() == false {
 
-		// class is deleting but the phase isn't deleting so set it
+		// is deleting but the phase isn't deleting so set it
 		if hp.Status.Phase != hostportv1alpha1.HostPortPhaseDeleting {
 			hp.Status.Phase = hostportv1alpha1.HostPortPhaseDeleting
 			err = r.Status().Update(ctx, hp)
@@ -81,7 +108,26 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, nil
 		}
 
-		// remove the finalizer to delete the pool
+		// don't allow deletion when in use
+		if hp.Spec.ClaimRef != nil {
+			hpc := &hostportv1alpha1.HostPortClaim{}
+			err := r.Get(ctx, types.NamespacedName{Namespace: hp.Spec.ClaimRef.Namespace, Name: hp.Spec.ClaimRef.Name}, hpc)
+			if err != nil {
+				if apierrors.IsNotFound(err) == false {
+					return ctrl.Result{}, err
+				}
+				hpc = nil
+			}
+
+			if hpc != nil {
+				if hpc.UID == hp.Spec.ClaimRef.UID {
+					// can't delete because claimref hpc exists
+					return ctrl.Result{}, nil
+				}
+			}
+		}
+
+		// remove the finalizer
 		for i, finalizer := range hp.Finalizers {
 			if finalizer == hostportv1alpha1.HostPortFinalizer {
 				hp.Finalizers = append(hp.Finalizers[:i], hp.Finalizers[i+1:]...)
@@ -121,75 +167,64 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.allocationLock.Lock()
 		defer r.allocationLock.Unlock()
 
-		hostPortPools := &hostportv1alpha1.HostPortPoolList{}
-		err = r.List(ctx, hostPortPools, client.MatchingFields{"spec.hostPortClassName": hpcl.Name})
+		// get all ports
+		hostPortList := &hostportv1alpha1.HostPortList{}
+		err = r.List(ctx, hostPortList)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		if len(hostPortPools.Items) == 0 {
-			// TODO: event saying can't find any pools for class
-			return ctrl.Result{Requeue: true}, nil
+		usedPorts := make(map[int]struct{})
+		for _, i := range hostPortList.Items {
+			if i.Status.Port > 0 {
+				usedPorts[i.Status.Port] = struct{}{}
+			}
 		}
 
-		portMap := make(map[string][]int)
-
-		// generate port map
-		for _, pool := range hostPortPools.Items {
-			if pool.Status.Phase != hostportv1alpha1.HostPortPoolPhaseReady {
-				continue
-			}
-
-			if pool.Spec.Enabled == false {
-				continue
-			}
-
-			hostPorts := &hostportv1alpha1.HostPortList{}
-			err := r.List(ctx, hostPorts, client.MatchingFields{"spec.hostPortPoolName": pool.Name})
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-
-			ports := make([]int, 0)
-
-		PoolNumbers:
-			for port := pool.Spec.Start; port <= pool.Spec.End; port++ {
-				for _, hostPort := range hostPorts.Items {
-					if *hostPort.Status.Port == int64(port) {
-						continue PoolNumbers
-					}
+		availablePorts := make([]int, 0)
+		for _, pool := range hpcl.Spec.Pools {
+			for port := pool.Start; port <= pool.End; port++ {
+				if _, ok := usedPorts[port]; !ok {
+					availablePorts = append(availablePorts, port)
 				}
-
-				ports = append(ports, port)
 			}
-
-			portMap[pool.Name] = ports
 		}
 
-		var foundPort *int64
-		var foundPool *string
+		if len(availablePorts) == 0 {
+			// TODO: event saying can't find any ports
 
-		for poolName, ports := range portMap {
-			if len(ports) == 0 {
-				continue
-			}
-
-			foundPort = pointer.Int64Ptr(int64(ports[0]))
-			foundPool = &poolName
-			break
+			err := fmt.Errorf("no free ports to allocate")
+			return ctrl.Result{}, err
 		}
 
-		// TODO: if we are in the middle of an allocation and a HPP turns to deleted, then we set the pool name and port
-		//  how do we prevent this?
-
-		hp.Status.Port = foundPort
-		hp.Status.HostPortPoolName = foundPool
+		hp.Status.Port = availablePorts[0]
 		hp.Status.Phase = hostportv1alpha1.HostPortPhaseAllocated
 		err = r.Status().Update(ctx, hp)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
+	}
+
+	if hp.Status.Phase == hostportv1alpha1.HostPortPhaseAllocated {
+		if hp.Spec.ClaimRef != nil {
+			hpc := &hostportv1alpha1.HostPortClaim{}
+			err := r.Get(ctx, types.NamespacedName{Namespace: hp.Spec.ClaimRef.Namespace, Name: hp.Spec.ClaimRef.Name}, hpc)
+			if err != nil {
+				if apierrors.IsNotFound(err) == false {
+					return ctrl.Result{}, err
+				}
+				hpc = nil
+			}
+
+			// my hpc is gone or different so delete me
+			if hpc == nil || hpc.UID != hp.Spec.ClaimRef.UID {
+				err := r.Delete(ctx, hp)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -203,19 +238,21 @@ func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
-	if err := mgr.GetFieldIndexer().IndexField(&hostportv1alpha1.HostPort{}, "spec.hostPortPoolName", func(rawObj runtime.Object) []string {
-		hp := rawObj.(*hostportv1alpha1.HostPort)
-
-		if hp.Status.HostPortPoolName == nil {
-			return []string{}
-		}
-
-		return []string{*hp.Status.HostPortPoolName}
-	}); err != nil {
-		return err
-	}
-
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPort{}).
+		Watches(&source.Kind{Type: &hostportv1alpha1.HostPortClaim{}}, &handler.EnqueueRequestsFromMapFunc{ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+			hpc := a.Object.(*hostportv1alpha1.HostPortClaim)
+			var req []reconcile.Request
+
+			if len(hpc.Status.HostPortName) > 0 {
+				req = append(req, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name: hpc.Status.HostPortName,
+					},
+				})
+			}
+
+			return req
+		})}).
 		Complete(r)
 }

@@ -25,6 +25,20 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+var (
+	HostPortPodAnnotationClaimPrefix = "claim." + GroupVersion.Group
+	HostPortPodAnnotationPortPrefix  = "port." + GroupVersion.Group
+)
+
+type HostPortClaimStatusPhase string
+
+const (
+	HostPortClaimPhasePending HostPortClaimStatusPhase = "Pending"
+	HostPortClaimPhaseBound   HostPortClaimStatusPhase = "Bound"
+
+	HostPortClaimPhaseDeleting HostPortClaimStatusPhase = "Deleting"
+)
+
 // HostPortClaimSpec defines the desired state of HostPortClaim
 type HostPortClaimSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -33,13 +47,7 @@ type HostPortClaimSpec struct {
 	// The host port class
 	// +kubebuilder:validation:Required
 	HostPortClassName string `json:"hostPortClassName"`
-
-	// The binding reference to the HostPort backing this claim
-	// +kubebuilder:validation:Optional
-	HostPortName string `json:"hostPortName"`
 }
-
-type HostPortClaimStatusPhase string
 
 // HostPortClaimStatus defines the observed state of HostPortClaim
 type HostPortClaimStatus struct {
@@ -49,6 +57,10 @@ type HostPortClaimStatus struct {
 	// Resource status conditions
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
+
+	// The binding reference to the HostPort backing this claim
+	// +kubebuilder:validation:Optional
+	HostPortName string `json:"hostPortName"`
 
 	// +kubebuilder:validation:Optional
 	Phase HostPortClaimStatusPhase `json:"phase,omitempty"`
@@ -60,6 +72,7 @@ type HostPortClaimStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 // +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
+// +kubebuilder:printcolumn:name="HOSTPORT",type=string,JSONPath=`.status.hostPortName`,priority=0
 
 // HostPortClaim is the Schema for the hostportclaims API
 type HostPortClaim struct {

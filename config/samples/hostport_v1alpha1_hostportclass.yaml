@@ -2,3 +2,9 @@ apiVersion: hostport.rmb938.com/v1alpha1
 kind: HostPortClass
 metadata:
   name: sample
+spec:
+  pools:
+    - start: 9000
+      end: 9000
+    - start: 9500
+      end: 9600

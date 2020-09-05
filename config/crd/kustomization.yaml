@@ -5,7 +5,6 @@ resources:
   - bases/hostport.rmb938.com_hostportclasses.yaml
   - bases/hostport.rmb938.com_hostportclaims.yaml
   - bases/hostport.rmb938.com_hostports.yaml
-  - bases/hostport.rmb938.com_hostportpools.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

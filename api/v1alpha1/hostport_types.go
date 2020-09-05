@@ -23,8 +23,6 @@ import (
 	intmetav1 "github.com/rmb938/hostport-allocator/apis/meta/v1"
 )
 
-var HostPortFinalizer = "hostport." + GroupVersion.Group
-
 type HostPortPhase string
 
 const (
@@ -59,17 +57,11 @@ type HostPortStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
-	// The pool that the port was allocated from
-	// +kubebuilder:validation:Optional
-	// +nullable
-	HostPortPoolName *string `json:"hostPortPoolName"`
-
 	// The port that was allocated by the HostPortClass
-	// +nullable
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:validation:Maximum=65535
-	Port *int64 `json:"port"`
+	Port int `json:"port"`
 
 	// +kubebuilder:validation:Optional
 	Phase HostPortPhase `json:"phase,omitempty"`
@@ -81,7 +73,6 @@ type HostPortStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="CLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
-// +kubebuilder:printcolumn:name="POOL",type=string,JSONPath=`.status.hostPortPoolName`,priority=0
 // +kubebuilder:printcolumn:name="PORT",type=integer,JSONPath=`.status.port`,priority=0
 
 // HostPort is the Schema for the hostports API

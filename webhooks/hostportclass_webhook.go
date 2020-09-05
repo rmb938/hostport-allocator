@@ -50,7 +50,7 @@ func (w *HostPortClassWebhook) SetupWebhookWithManager(mgr ctrl.Manager) {
 
 var _ webhook.Defaulter = &HostPortClassWebhook{}
 
-func (w *HostPortClassWebhook) Default(obj runtime.Object) {
+func (w *HostPortClassWebhook) Default(obj runtime.Object) error {
 	r := obj.(*hostportv1alpha1.HostPortClass)
 
 	hostportclasslog.Info("default", "name", r.Name)
@@ -59,19 +59,36 @@ func (w *HostPortClassWebhook) Default(obj runtime.Object) {
 		hasFinalizer := false
 
 		for _, finalizer := range r.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortClassFinalizer {
+			if finalizer == hostportv1alpha1.HostPortFinalizer {
 				hasFinalizer = true
 				break
 			}
 		}
 
 		if hasFinalizer == false {
-			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortClassFinalizer)
+			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortFinalizer)
 		}
 	}
+
+	return nil
 }
 
 var _ webhook.Validator = &HostPortClassWebhook{}
+
+func (w *HostPortClassWebhook) validatePools(r *hostportv1alpha1.HostPortClass) field.ErrorList {
+	var allErrs field.ErrorList
+
+	for index, pool := range r.Spec.Pools {
+		if pool.Start > pool.End {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("pools").Index(index).Child("end"), pool.End,
+				"End must be greater or equal to start"))
+		}
+	}
+
+	// TODO: make sure there are no overlapping pools
+
+	return allErrs
+}
 
 func (w *HostPortClassWebhook) ValidateCreate(obj runtime.Object) error {
 	_ = context.Background()
@@ -79,7 +96,7 @@ func (w *HostPortClassWebhook) ValidateCreate(obj runtime.Object) error {
 
 	hostportclasslog.Info("validate create", "name", r.Name)
 
-	var allErrs field.ErrorList
+	allErrs := w.validatePools(r)
 
 	if len(allErrs) == 0 {
 		return nil
@@ -98,7 +115,7 @@ func (w *HostPortClassWebhook) ValidateUpdate(obj runtime.Object, old runtime.Ob
 	hostportclasslog.Info("validate update", "name", r.Name)
 	_ = old.(*hostportv1alpha1.HostPortClass)
 
-	var allErrs field.ErrorList
+	allErrs := w.validatePools(r)
 
 	if len(allErrs) == 0 {
 		return nil

@@ -20,40 +20,42 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var HostPortClassFinalizer = "hostportclass." + GroupVersion.Group
-
-type HostPortClassPhase string
-
-const (
-	HostPortClassPhasePending  HostPortClassPhase = "Pending"
-	HostPortClassPhaseReady    HostPortClassPhase = "Ready"
-	HostPortClassPhaseDeleting HostPortClassPhase = "Deleting"
-)
-
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+type HostPortClassSpecPool struct {
+	// The start port for the pool
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Start int `json:"start"`
+
+	// The end port for the pool
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	End int `json:"end"`
+}
 
 // HostPortClassSpec defines the desired state of HostPortClass
 type HostPortClassSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// +kubebuilder:validation:Required
+	Pools []HostPortClassSpecPool `json:"pools"`
 }
 
 // HostPortClassStatus defines the observed state of HostPortClass
 type HostPortClassStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// +kubebuilder:validation:Optional
-	Phase HostPortClassPhase `json:"phase,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster,shortName=hpcl
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 
 // HostPortClass is the Schema for the hostportclasses API
 type HostPortClass struct {

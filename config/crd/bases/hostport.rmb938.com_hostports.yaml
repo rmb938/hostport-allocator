@@ -15,9 +15,6 @@ spec:
   - JSONPath: .status.phase
     name: STATUS
     type: string
-  - JSONPath: .status.hostPortPoolName
-    name: POOL
-    type: string
   - JSONPath: .status.port
     name: PORT
     type: integer
@@ -155,18 +152,12 @@ spec:
                 - type
                 type: object
               type: array
-            hostPortPoolName:
-              description: The pool that the port was allocated from
-              nullable: true
-              type: string
             phase:
               type: string
             port:
               description: The port that was allocated by the HostPortClass
-              format: int64
               maximum: 65535
-              minimum: 1
-              nullable: true
+              minimum: 0
               type: integer
           type: object
       type: object

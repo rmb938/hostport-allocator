@@ -1,0 +1,22 @@
+apiVersion: hostport.rmb938.com/v1alpha1
+kind: HostPortClaim
+metadata:
+  name: echo-web
+  namespace: sample
+spec:
+  hostPortClassName: sample
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: echo
+  namespace: sample
+  annotations:
+    claim.hostport.rmb938.com/web: echo-web
+spec:
+  containers:
+    - name: echo
+      image: k8s.gcr.io/echoserver:1.4
+      ports:
+        - name: web
+          containerPort: 8080

@@ -18,7 +18,9 @@ package webhooks
 
 import (
 	"context"
+	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -51,7 +53,7 @@ func (w *HostPortWebhook) SetupWebhookWithManager(mgr ctrl.Manager) {
 var _ webhook.Defaulter = &HostPortWebhook{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (w *HostPortWebhook) Default(obj runtime.Object) {
+func (w *HostPortWebhook) Default(obj runtime.Object) error {
 	r := obj.(*hostportv1alpha1.HostPort)
 
 	hostportlog.Info("default", "name", r.Name)
@@ -70,6 +72,8 @@ func (w *HostPortWebhook) Default(obj runtime.Object) {
 			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortFinalizer)
 		}
 	}
+
+	return nil
 }
 
 var _ webhook.Validator = &HostPortWebhook{}
@@ -101,6 +105,7 @@ func (w *HostPortWebhook) ValidateUpdate(obj runtime.Object, old runtime.Object)
 
 	var allErrs field.ErrorList
 
+	// don't allow changing class
 	if r.Spec.HostPortClassName != oldHP.Spec.HostPortClassName {
 		allErrs = append(allErrs,
 			field.Forbidden(field.NewPath("spec").Child("hostPortClassName"),
@@ -108,17 +113,27 @@ func (w *HostPortWebhook) ValidateUpdate(obj runtime.Object, old runtime.Object)
 		)
 	}
 
-	if oldHP.Status.Port != nil && *r.Status.Port != *oldHP.Status.Port {
+	// don't allow changing claim
+	if equality.Semantic.DeepEqual(oldHP.Spec.ClaimRef, r.Spec.ClaimRef) == false {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("spec").Child("claimRef"),
+				"cannot change claimRef"),
+		)
+	}
+
+	// don't allow changing port once set
+	if oldHP.Status.Port > 0 && r.Status.Port != oldHP.Status.Port {
 		allErrs = append(allErrs,
 			field.Forbidden(field.NewPath("status").Child("port"),
 				"cannot change port"),
 		)
 	}
 
-	if oldHP.Status.HostPortPoolName != nil && *r.Status.HostPortPoolName != *oldHP.Status.HostPortPoolName {
+	// TODO: only allow setting port when also setting as allocated
+	if oldHP.Status.Port == 0 && r.Status.Port > 0 && r.Status.Phase != hostportv1alpha1.HostPortPhaseAllocated {
 		allErrs = append(allErrs,
-			field.Forbidden(field.NewPath("status").Child("hostPortPoolName"),
-				"cannot change hostPortPoolName"),
+			field.Invalid(field.NewPath("status").Child("port"), r.Status.Port,
+				fmt.Sprintf("port can only be set when also setting the phase to %s", hostportv1alpha1.HostPortPhaseAllocated)),
 		)
 	}
 

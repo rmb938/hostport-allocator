@@ -60,24 +60,6 @@ webhooks:
     - UPDATE
     resources:
     - hostportclasses
-- clientConfig:
-    caBundle: Cg==
-    service:
-      name: webhook-service
-      namespace: system
-      path: /mutate-hostport-rmb938-com-v1alpha1-hostportpool
-  failurePolicy: Fail
-  name: mhostportpool.kb.io
-  rules:
-  - apiGroups:
-    - hostport.rmb938.com
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - hostportpools
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -140,21 +122,3 @@ webhooks:
     - UPDATE
     resources:
     - hostportclasses
-- clientConfig:
-    caBundle: Cg==
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-hostport-rmb938-com-v1alpha1-hostportpool
-  failurePolicy: Fail
-  name: vhostportpool.kb.io
-  rules:
-  - apiGroups:
-    - hostport.rmb938.com
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - hostportpools
