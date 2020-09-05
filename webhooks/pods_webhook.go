@@ -46,16 +46,6 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 
 	var allErrs field.ErrorList
 
-	// check if host ports set
-	for containerIndex, container := range r.Spec.Containers {
-		for portIndex, port := range container.Ports {
-			if port.HostPort > 0 {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("hostPort"), port.HostPort,
-					"host ports cannot be set"))
-			}
-		}
-	}
-
 	definedClaims := make(map[string]string)
 	for annotation, value := range r.Annotations {
 		if strings.HasPrefix(annotation, hostportv1alpha1.HostPortPodAnnotationClaimPrefix+"/") {
@@ -75,6 +65,33 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 		}
 	}
 
+	// host ports must not be set if not defined
+	// all ports must be named
+	// all ports must have unique names
+	portNames := make(map[string]struct{ containerIndex, portIndex int })
+	for containerIndex, container := range r.Spec.Containers {
+		for portIndex, port := range container.Ports {
+			path := field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("name")
+			if len(definedClaims) != 0 {
+				if len(port.Name) == 0 {
+					allErrs = append(allErrs, field.Invalid(path, port.Name,
+						"Port name must be set"))
+				}
+
+				if _, ok := portNames[port.Name]; ok {
+					allErrs = append(allErrs, field.Duplicate(path, port.Name))
+				}
+			}
+
+			if _, ok := definedClaims[port.Name]; !ok && port.HostPort > 0 {
+				allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("hostPort"), port.HostPort,
+					"host ports cannot be set"))
+			}
+
+			portNames[port.Name] = struct{ containerIndex, portIndex int }{containerIndex: containerIndex, portIndex: portIndex}
+		}
+	}
+
 	// no host port claims defined so don't do anything
 	if len(definedClaims) == 0 {
 		if len(allErrs) == 0 {
@@ -84,24 +101,6 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 		return apierrors.NewInvalid(
 			schema.GroupKind{Group: "", Kind: r.Kind},
 			r.Name, allErrs)
-	}
-
-	// all ports must be named
-	// all ports must have unique names
-	portNames := make(map[string]struct{ containerIndex, portIndex int })
-	for containerIndex, container := range r.Spec.Containers {
-		for portIndex, port := range container.Ports {
-			path := field.NewPath("spec").Child("containers").Index(containerIndex).Child("ports").Index(portIndex).Child("name")
-			if len(port.Name) == 0 {
-				allErrs = append(allErrs, field.Invalid(path, port.Name,
-					"Port name must be set"))
-			}
-
-			if _, ok := portNames[port.Name]; ok {
-				allErrs = append(allErrs, field.Duplicate(path, port.Name))
-			}
-			portNames[port.Name] = struct{ containerIndex, portIndex int }{containerIndex: containerIndex, portIndex: portIndex}
-		}
 	}
 
 	for portName, claimName := range definedClaims {
