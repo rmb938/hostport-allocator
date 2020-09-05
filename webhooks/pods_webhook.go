@@ -65,9 +65,10 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 		}
 	}
 
-	// host ports must not be set if not defined
-	// all ports must be named
-	// all ports must have unique names
+	// host ports must not be set
+	// if claims defined
+	//  all ports must be named
+	//  all ports must have unique names
 	portNames := make(map[string]struct{ containerIndex, portIndex int })
 	for containerIndex, container := range r.Spec.Containers {
 		for portIndex, port := range container.Ports {
