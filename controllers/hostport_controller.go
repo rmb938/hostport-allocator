@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -94,17 +95,7 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, nil
 		}
 
-		hasFinalizer := false
-
-		for _, finalizer := range hp.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hasFinalizer = true
-				break
-			}
-		}
-
-		// It doesn't have finalizer to ignore it
-		if hasFinalizer == false {
+		if controllerutil.ContainsFinalizer(hp, hostportv1alpha1.HostPortFinalizer) {
 			return ctrl.Result{}, nil
 		}
 
@@ -128,12 +119,7 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		// remove the finalizer
-		for i, finalizer := range hp.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hp.Finalizers = append(hp.Finalizers[:i], hp.Finalizers[i+1:]...)
-				break
-			}
-		}
+		controllerutil.RemoveFinalizer(hp, hostportv1alpha1.HostPortFinalizer)
 
 		// send update to remove finalizer
 		err = r.Update(ctx, hp)
@@ -231,7 +217,7 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(&hostportv1alpha1.HostPort{}, "spec.hostPortClassName", func(rawObj runtime.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &hostportv1alpha1.HostPort{}, "spec.hostPortClassName", func(rawObj runtime.Object) []string {
 		hp := rawObj.(*hostportv1alpha1.HostPort)
 		return []string{hp.Spec.HostPortClassName}
 	}); err != nil {

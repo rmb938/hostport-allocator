@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -59,18 +60,7 @@ func (w *HostPortWebhook) Default(obj runtime.Object) error {
 	hostportlog.Info("default", "name", r.Name)
 
 	if r.DeletionTimestamp.IsZero() {
-		hasFinalizer := false
-
-		for _, finalizer := range r.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hasFinalizer = true
-				break
-			}
-		}
-
-		if hasFinalizer == false {
-			r.Finalizers = append(r.Finalizers, hostportv1alpha1.HostPortFinalizer)
-		}
+		controllerutil.AddFinalizer(r, hostportv1alpha1.HostPortFinalizer)
 	}
 
 	return nil

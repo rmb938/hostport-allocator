@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -69,17 +70,7 @@ func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 			return ctrl.Result{}, nil
 		}
 
-		hasFinalizer := false
-
-		for _, finalizer := range hpc.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hasFinalizer = true
-				break
-			}
-		}
-
-		// It doesn't have finalizer to ignore it
-		if hasFinalizer == false {
+		if controllerutil.ContainsFinalizer(hpc, hostportv1alpha1.HostPortFinalizer) {
 			return ctrl.Result{}, nil
 		}
 
@@ -107,12 +98,7 @@ func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		}
 
 		// remove the finalizer
-		for i, finalizer := range hpc.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hpc.Finalizers = append(hpc.Finalizers[:i], hpc.Finalizers[i+1:]...)
-				break
-			}
-		}
+		controllerutil.RemoveFinalizer(hpc, hostportv1alpha1.HostPortFinalizer)
 
 		// send update to remove finalizer
 		err = r.Update(ctx, hpc)

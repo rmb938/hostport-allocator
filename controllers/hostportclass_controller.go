@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
@@ -50,27 +51,12 @@ func (r *HostPortClassReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 
 	// If class is deleting
 	if hpcl.DeletionTimestamp.IsZero() == false {
-		hasFinalizer := false
-
-		for _, finalizer := range hpcl.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hasFinalizer = true
-				break
-			}
-		}
-
-		// It doesn't have finalizer to ignore it
-		if hasFinalizer == false {
+		if controllerutil.ContainsFinalizer(hpcl, hostportv1alpha1.HostPortFinalizer) {
 			return ctrl.Result{}, nil
 		}
 
 		// remove the finalizer
-		for i, finalizer := range hpcl.Finalizers {
-			if finalizer == hostportv1alpha1.HostPortFinalizer {
-				hpcl.Finalizers = append(hpcl.Finalizers[:i], hpcl.Finalizers[i+1:]...)
-				break
-			}
-		}
+		controllerutil.RemoveFinalizer(hpcl, hostportv1alpha1.HostPortFinalizer)
 
 		// send update to remove finalizer
 		err = r.Update(ctx, hpcl)
