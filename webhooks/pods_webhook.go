@@ -92,17 +92,6 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 		}
 	}
 
-	// no host port claims defined so don't do anything
-	if len(definedClaims) == 0 {
-		if len(allErrs) == 0 {
-			return nil
-		}
-
-		return apierrors.NewInvalid(
-			schema.GroupKind{Group: "", Kind: r.Kind},
-			r.Name, allErrs)
-	}
-
 	for portName, claimName := range definedClaims {
 		if len(portName) == 0 || len(claimName) == 0 {
 			continue
