@@ -99,6 +99,13 @@ func (w *HostPortClaimWebhook) ValidateUpdate(obj runtime.Object, old runtime.Ob
 		)
 	}
 
+	if len(oldHPC.Spec.HostPortName) > 0 && oldHPC.Spec.HostPortName != r.Spec.HostPortName {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("spec").Child("hostPortName"),
+				"cannot change hostPortName once set"),
+		)
+	}
+
 	if len(allErrs) == 0 {
 		return nil
 	}

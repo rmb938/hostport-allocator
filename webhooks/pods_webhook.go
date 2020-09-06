@@ -110,17 +110,17 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 			continue
 		}
 
-		if len(hpc.Status.HostPortName) == 0 {
+		if hpc.Status.Phase != hostportv1alpha1.HostPortClaimPhaseBound {
 			allErrs = append(allErrs, field.Invalid(path, claimName,
 				"hostPortClaim is not bound to a host port yet"))
 			continue
 		}
 
 		hp := &hostportv1alpha1.HostPort{}
-		err = w.client.Get(ctx, types.NamespacedName{Name: hpc.Status.HostPortName}, hp)
+		err = w.client.Get(ctx, types.NamespacedName{Name: hpc.Spec.HostPortName}, hp)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
-				allErrs = append(allErrs, field.NotFound(path.Child("hostPort"), hpc.Status.HostPortName))
+				allErrs = append(allErrs, field.NotFound(path.Child("hostPort"), hpc.Spec.HostPortName))
 			} else {
 				allErrs = append(allErrs, field.InternalError(path.Child("hostPort"), err))
 			}

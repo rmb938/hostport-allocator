@@ -119,28 +119,45 @@ func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 
 	if hpc.Status.Phase == hostportv1alpha1.HostPortClaimPhasePending {
 
-		hp := &hostportv1alpha1.HostPort{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: fmt.Sprintf("hpc-%s", hpc.UID),
-			},
-			Spec: hostportv1alpha1.HostPortSpec{
-				ClaimRef: &corev1.ObjectReference{
-					Namespace: hpc.Namespace,
-					Name:      hpc.Name,
-					UID:       hpc.UID,
+		if len(hpc.Spec.HostPortName) == 0 {
+			hp := &hostportv1alpha1.HostPort{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: fmt.Sprintf("hpc-%s", hpc.UID),
 				},
-				HostPortClassName: hpc.Spec.HostPortClassName,
-			},
-		}
+				Spec: hostportv1alpha1.HostPortSpec{
+					ClaimRef: &corev1.ObjectReference{
+						Namespace: hpc.Namespace,
+						Name:      hpc.Name,
+						UID:       hpc.UID,
+					},
+					HostPortClassName: hpc.Spec.HostPortClassName,
+				},
+			}
 
-		err := r.Create(ctx, hp)
-		if err != nil {
-			if apierrors.IsAlreadyExists(err) == false {
+			err := r.Create(ctx, hp)
+			if err != nil {
+				if apierrors.IsAlreadyExists(err) == false {
+					return ctrl.Result{}, err
+				}
+			}
+
+			hpc.Spec.HostPortName = fmt.Sprintf("hpc-%s", hpc.UID)
+			err = r.Update(ctx, hpc)
+			if err != nil {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{}, nil
 		}
 
-		hpc.Status.HostPortName = fmt.Sprintf("hpc-%s", hpc.UID)
+		hp := &hostportv1alpha1.HostPort{}
+		err := r.Get(ctx, types.NamespacedName{Name: hpc.Spec.HostPortName}, hp)
+		if err != nil {
+			if apierrors.IsAlreadyExists(err) {
+				// TODO: event saying can't find hostport
+			}
+			return ctrl.Result{}, err
+		}
+
 		hpc.Status.Phase = hostportv1alpha1.HostPortClaimPhaseBound
 		err = r.Status().Update(ctx, hpc)
 		if err != nil {

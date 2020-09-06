@@ -193,6 +193,11 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if hp.Status.Phase == hostportv1alpha1.HostPortPhaseAllocated {
+		// TODO: reclaimPolicy
+		//  Retain - default for manually created HostPorts
+		//    Do not delete when claimRef is gone, just set it to nil
+		//  Delete - default for dynamically provisioned HostPorts
+		//    Delete when ClaimRef is gone
 		if hp.Spec.ClaimRef != nil {
 			hpc := &hostportv1alpha1.HostPortClaim{}
 			err := r.Get(ctx, types.NamespacedName{Namespace: hp.Spec.ClaimRef.Namespace, Name: hp.Spec.ClaimRef.Name}, hpc)
@@ -230,10 +235,10 @@ func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			hpc := a.Object.(*hostportv1alpha1.HostPortClaim)
 			var req []reconcile.Request
 
-			if len(hpc.Status.HostPortName) > 0 {
+			if len(hpc.Spec.HostPortName) > 0 {
 				req = append(req, reconcile.Request{
 					NamespacedName: types.NamespacedName{
-						Name: hpc.Status.HostPortName,
+						Name: hpc.Spec.HostPortName,
 					},
 				})
 			}

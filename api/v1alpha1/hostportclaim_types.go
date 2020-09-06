@@ -47,6 +47,10 @@ type HostPortClaimSpec struct {
 	// The host port class
 	// +kubebuilder:validation:Required
 	HostPortClassName string `json:"hostPortClassName"`
+
+	// The binding reference to the HostPort backing this claim
+	// +kubebuilder:validation:Optional
+	HostPortName string `json:"hostPortName"`
 }
 
 // HostPortClaimStatus defines the observed state of HostPortClaim
@@ -58,10 +62,6 @@ type HostPortClaimStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []intmetav1.Condition `json:"conditions,omitempty"`
 
-	// The binding reference to the HostPort backing this claim
-	// +kubebuilder:validation:Optional
-	HostPortName string `json:"hostPortName"`
-
 	// +kubebuilder:validation:Optional
 	Phase HostPortClaimStatusPhase `json:"phase,omitempty"`
 }
@@ -72,7 +72,7 @@ type HostPortClaimStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 // +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
-// +kubebuilder:printcolumn:name="HOSTPORT",type=string,JSONPath=`.status.hostPortName`,priority=0
+// +kubebuilder:printcolumn:name="HOSTPORT",type=string,JSONPath=`.spec.hostPortName`,priority=0
 
 // HostPortClaim is the Schema for the hostportclaims API
 type HostPortClaim struct {
