@@ -19,7 +19,7 @@ serviceAccount:
   # Specifies whether a service account should be created
   create: true
   # Annotations to add to the service account
-  annotations: {}
+  annotations: { }
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
@@ -44,13 +44,14 @@ webhook:
       create: true
 
       # If create is false use this reference to the certificate issuer
-      ref: {}
+      ref: { }
     #   kind: Issuer
     #   name: selfsigned-issuer
 
   # The caBundle to use.
   # Ignored if certificate.inject is true
-  caBundle: "bm90IHNldA==" # not set
+  # This value decodes to "not set"
+  caBundle: "bm90IHNldA=="
 
   # Configuration for the pod webhook
   pod:
@@ -60,11 +61,11 @@ webhook:
       matchLabels:
         hostport.rmb938.com: "true"
 
-podAnnotations: {}
+podAnnotations: { }
 
-podSecurityContext: {}
+podSecurityContext: { }
 
-securityContext: {}
+securityContext: { }
 # capabilities:
 #   drop:
 #   - ALL
@@ -79,9 +80,9 @@ prometheus:
     prometheusInstance: default
     interval: 60s
     scrapeTimeout: 30s
-    labels: {}
+    labels: { }
 
-resources: {}
+resources: { }
 # We usually recommend not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
 # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -93,8 +94,8 @@ resources: {}
 #   cpu: 100m
 #   memory: 128Mi
 
-nodeSelector: {}
+nodeSelector: { }
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
