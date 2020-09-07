@@ -1,0 +1,34 @@
+name: Build and Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch:
+          - armd64
+          - arm
+          - arm64
+
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.14.6'
+
+      - name: Build Manager
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          make GOARCH=$ARCH manager
+
+      - name: Build Docker Image
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          make GOARCH=$ARCH docker
