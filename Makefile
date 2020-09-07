@@ -99,7 +99,7 @@ $(PUSH_DOCKER_ARCHS): docker-push-%:
 .PHONY: docker-manifest
 docker-manifest:
 	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create -a "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" $(foreach ARCH,$(DOCKER_ARCHS),$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$(ARCH):$(DOCKER_IMAGE_TAG))
-	DOCKER_CLI_EXPERIMENTAL=enabled $(foreach ARCH,$(DOCKER_ARCHS),docker manifest annotate --arch $(ARCH) "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) $(DOCKER_ARCHS),$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$(ARCH):$(DOCKER_IMAGE_TAG);")
+	DOCKER_CLI_EXPERIMENTAL=enabled $(foreach ARCH,$(DOCKER_ARCHS),docker manifest annotate --arch $(ARCH) "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) $(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$(ARCH):$(DOCKER_IMAGE_TAG);")
 	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
 
 # find or download controller-gen
