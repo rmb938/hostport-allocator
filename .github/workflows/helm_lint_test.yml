@@ -24,6 +24,11 @@ jobs:
         # Only build a kind cluster if there are chart changes to test.
         if: steps.lint.outputs.changed == 'true'
 
+      - name: Install Cert Manager
+        run: |
+          kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.15.2/cert-manager.yaml
+          kubectl wait -n cert-manager --for=condition=Available --timeout=300s deployment cert-manager-webhook
+
       - name: Run chart-testing (install)
         uses: helm/chart-testing-action@v1.0.0
         with:
