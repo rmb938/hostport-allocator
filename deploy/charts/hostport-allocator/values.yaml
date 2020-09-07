@@ -25,20 +25,12 @@ serviceAccount:
   name: ""
 
 webhook:
-  # Use cert-manager to manage the webhook certificates
+  # Certificate configuration for the webooks
   certificate:
     # Allow cert manager to create the certificate
     create: true
     # Allow cert manager to inject the certificate into the webhook
     inject: true
-
-    issuer:
-      create: true
-
-      # If create is false use this reference to the certificate issuer
-      ref: {}
-    #   kind: Issuer
-    #   name: selfsigned-issuer
 
     # The name of the certificate to use.
     # If not set a name is generated using the fullname template
@@ -47,6 +39,14 @@ webhook:
     # The name of the secret to use.
     # If not set a name is generated using the fullname template
     secretName: ""
+
+    issuer:
+      create: true
+
+      # If create is false use this reference to the certificate issuer
+      ref: {}
+    #   kind: Issuer
+    #   name: selfsigned-issuer
 
   # The caBundle to use.
   # Ignored if certificate.inject is true
