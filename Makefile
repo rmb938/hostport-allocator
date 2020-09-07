@@ -87,13 +87,13 @@ $(BUILD_DOCKER_ARCHS): docker-%:
 		--build-arg OS="linux" \
 		.
 
-.PHONY: docker-latest LATEST_DOCKER_ARCHS
-docker-latest: LATEST_DOCKER_ARCHS
+.PHONY: docker-latest $(LATEST_DOCKER_ARCHS)
+docker-latest: $(LATEST_DOCKER_ARCHS)
 $(LATEST_DOCKER_ARCHS): docker-latest-%:
 	docker tag "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:latest"
 
-.PHONY: docker-push PUSH_DOCKER_ARCHS
-docker-push: PUSH_DOCKER_ARCHS
+.PHONY: docker-push $(PUSH_DOCKER_ARCHS)
+docker-push: $(PUSH_DOCKER_ARCHS)
 $(PUSH_DOCKER_ARCHS): docker-push-%:
 	docker push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)"
 
