@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         arch:
-          - armd64
+          - amd64
           - arm
           - arm64
 
