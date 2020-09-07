@@ -1,13 +1,12 @@
-name: Helm List
+name: Helm Lint
 
 on:
   - push
   - pull_request
 
 jobs:
-  lint-test:
-
-    name: Helm Test
+  lint:
+    name: Helm Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
