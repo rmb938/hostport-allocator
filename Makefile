@@ -1,9 +1,9 @@
-GOARCH ?= $(shell go env GOARCH)
-ifeq ($(GOARCH), arm)
-DOCKER_ARG_ARCH=armv7
-else
-DOCKER_ARG_ARCH=$(GOARCH)
-endif
+DOCKER_ARCHS ?= amd64 armv7 arm64
+BUILD_DOCKER_ARCHS = $(addprefix docker-,$(DOCKER_ARCHS))
+PUSH_DOCKER_ARCHS = $(addprefix docker-push-,$(DOCKER_ARCHS))
+LATEST_DOCKER_ARCHS = $(addprefix docker-latest-,$(DOCKER_ARCHS))
+
+BUILD_GO_ARCHS = $(addprefix manager-,$(DOCKER_ARCHS))
 
 DOCKER_IMAGE_NAME ?= hostport-allocator
 DOCKER_REPO ?= local
@@ -25,9 +25,10 @@ all: manager
 test: generate fmt vet manifests
 	go test ./... -coverprofile cover.out
 
-# Build manager binary
-manager: fmt vet
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(GOARCH) go build -o bin/hostport-allocator-manager-linux-$(DOCKER_ARG_ARCH) main.go
+.PHONY: manager $(BUILD_GO_ARCHS)
+manager: fmt vet $(BUILD_GO_ARCHS)
+$(BUILD_GO_ARCHS): manager-%:
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(if $(filter $*,armv7),arm,$*) go build -o bin/hostport-allocator-manager-linux-$* main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -78,18 +79,28 @@ tilt:
 tilt-down:
 	KUBECONFIG=kind-kubeconfig tilt down
 
-# Build docker image
-docker:
-	docker build -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)" --build-arg ARCH=$(DOCKER_ARG_ARCH) --build-arg OS="linux" .
+.PHONY: docker $(BUILD_DOCKER_ARCHS)
+docker: $(BUILD_DOCKER_ARCHS)
+$(BUILD_DOCKER_ARCHS): docker-%:
+	docker build -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" \
+		--build-arg ARCH="$*" \
+		--build-arg OS="linux" \
+		.
 
-# Tag docker image as latest
-docker-latest:
-	docker tag "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)" "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):latest-$(GOARCH)"
+.PHONY: docker-latest LATEST_DOCKER_ARCHS
+docker-latest: LATEST_DOCKER_ARCHS
+$(LATEST_DOCKER_ARCHS): docker-latest-%:
+	docker tag "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:latest"
 
-# Push docker image
-docker-push:
-	docker push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)-$(GOARCH)"
+.PHONY: docker-push PUSH_DOCKER_ARCHS
+docker-push: PUSH_DOCKER_ARCHS
+$(PUSH_DOCKER_ARCHS): docker-push-%:
+	docker push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)"
 
+.PHONY: docker-manifest
+docker-manifest:
+	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create -a "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" $(foreach ARCH,$(DOCKER_ARCHS),$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$(ARCH):$(DOCKER_IMAGE_TAG))
+	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:

@@ -6,13 +6,6 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        arch:
-          - amd64
-          - arm
-          - arm64
-
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -22,13 +15,9 @@ jobs:
           go-version: '^1.14.6'
 
       - name: Build Manager
-        env:
-          ARCH: ${{ matrix.arch }}
         run: |
-          make GOARCH=$ARCH manager
+          make manager
 
       - name: Build Docker Image
-        env:
-          ARCH: ${{ matrix.arch }}
         run: |
-          make GOARCH=$ARCH docker
+          make docker
