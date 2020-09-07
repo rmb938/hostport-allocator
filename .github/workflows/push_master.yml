@@ -1,0 +1,39 @@
+name: Push Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.14.6'
+
+      - name: Build Manager
+        run: |
+          make manager
+
+      - name: Build Docker Image
+        env:
+          DOCKER_REPO: ${{ github.repository_owner }}
+        run: |
+          make DOCKER_REPO=$DOCKER_REPO docker
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Publish Docker Image
+        env:
+          DOCKER_REPO: ${{ github.repository_owner }}
+        run: |
+          make DOCKER_REPO=$DOCKER_REPO docker-push docker-manifest
