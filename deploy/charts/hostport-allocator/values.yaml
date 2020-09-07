@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: docker.pkg.github.com/rmb938/hostport-allocator/hostport-allocator
+  repository: ghcr.io/rmb938/hostport-allocator-linux-amd64
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
