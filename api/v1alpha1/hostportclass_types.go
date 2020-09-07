@@ -56,6 +56,7 @@ type HostPortClassStatus struct {
 // +kubebuilder:resource:scope=Cluster,shortName=hpcl
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 
 // HostPortClass is the Schema for the hostportclasses API
 type HostPortClass struct {

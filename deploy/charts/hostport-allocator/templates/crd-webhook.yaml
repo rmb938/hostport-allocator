@@ -1,0 +1,156 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "hostport-allocator.fullname" . }}-crd
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+  {{- if .Values.webhook.certificate.inject }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
+  {{- end }}
+webhooks:
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-hostport-rmb938-com-v1alpha1-hostport
+    failurePolicy: Fail
+    name: mhostport.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostports
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-hostport-rmb938-com-v1alpha1-hostportclaim
+    failurePolicy: Fail
+    name: mhostportclaim.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostportclaims
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-hostport-rmb938-com-v1alpha1-hostportclass
+    failurePolicy: Fail
+    name: mhostportclass.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostportclasses
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "hostport-allocator.fullname" . }}-crd
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+  {{- if .Values.webhook.certificate.inject }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
+  {{- end }}
+webhooks:
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /validate-hostport-rmb938-com-v1alpha1-hostport
+    failurePolicy: Fail
+    name: vhostport.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostports
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /validate-hostport-rmb938-com-v1alpha1-hostportclaim
+    failurePolicy: Fail
+    name: vhostportclaim.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostportclaims
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /validate-hostport-rmb938-com-v1alpha1-hostportclass
+    failurePolicy: Fail
+    name: vhostportclass.kb.io
+    rules:
+      - apiGroups:
+          - hostport.rmb938.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - hostportclasses

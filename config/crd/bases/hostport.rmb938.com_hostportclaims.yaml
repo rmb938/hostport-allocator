@@ -18,6 +18,9 @@ spec:
   - JSONPath: .spec.hostPortName
     name: HOSTPORT
     type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: AGE
+    type: date
   group: hostport.rmb938.com
   names:
     kind: HostPortClaim

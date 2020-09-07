@@ -73,6 +73,7 @@ type HostPortClaimStatus struct {
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 // +kubebuilder:printcolumn:name="HOSTPORTCLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 // +kubebuilder:printcolumn:name="HOSTPORT",type=string,JSONPath=`.spec.hostPortName`,priority=0
+// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 
 // HostPortClaim is the Schema for the hostportclaims API
 type HostPortClaim struct {

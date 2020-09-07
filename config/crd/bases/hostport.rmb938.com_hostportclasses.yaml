@@ -8,6 +8,10 @@ metadata:
   creationTimestamp: null
   name: hostportclasses.hostport.rmb938.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .metadata.creationTimestamp
+    name: AGE
+    type: date
   group: hostport.rmb938.com
   names:
     kind: HostPortClass

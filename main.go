@@ -24,6 +24,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
@@ -45,8 +46,10 @@ func init() {
 }
 
 func main() {
+	var healthAddr string
 	var metricsAddr string
 	var enableLeaderElection bool
+	flag.StringVar(&healthAddr, "health-addr", ":8081", "The address the health endpoints binds to.")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
@@ -56,14 +59,27 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		Port:               9443,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "f10832af.rmb938.com",
+		Scheme:                 scheme,
+		MetricsBindAddress:     metricsAddr,
+		Port:                   9443,
+		HealthProbeBindAddress: healthAddr,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "f10832af.rmb938.com",
 	})
 	if err != nil {
-		setupLog.Error(err, "unable to start manager")
+		setupLog.Error(err, "unable to create manager")
+		os.Exit(1)
+	}
+
+	err = mgr.AddReadyzCheck("ping", healthz.Ping)
+	if err != nil {
+		setupLog.Error(err, "unable to add readyz check")
+		os.Exit(1)
+	}
+
+	err = mgr.AddHealthzCheck("ping", healthz.Ping)
+	if err != nil {
+		setupLog.Error(err, "unable to add healthz check")
 		os.Exit(1)
 	}
 

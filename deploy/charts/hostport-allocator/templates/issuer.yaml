@@ -1,0 +1,11 @@
+{{- if .Values.webhook.certificate.issuer.create -}}
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: {{ include "hostport-allocator.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+  {{- end }}

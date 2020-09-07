@@ -18,6 +18,9 @@ spec:
   - JSONPath: .status.port
     name: PORT
     type: integer
+  - JSONPath: .metadata.creationTimestamp
+    name: AGE
+    type: date
   group: hostport.rmb938.com
   names:
     kind: HostPort

@@ -74,6 +74,7 @@ type HostPortStatus struct {
 // +kubebuilder:printcolumn:name="CLASS",type=string,JSONPath=`.spec.hostPortClassName`,priority=0
 // +kubebuilder:printcolumn:name="STATUS",type=string,JSONPath=`.status.phase`,priority=0
 // +kubebuilder:printcolumn:name="PORT",type=integer,JSONPath=`.status.port`,priority=0
+// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 
 // HostPort is the Schema for the hostports API
 type HostPort struct {

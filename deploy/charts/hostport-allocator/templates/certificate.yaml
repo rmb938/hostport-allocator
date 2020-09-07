@@ -1,0 +1,22 @@
+{{- if .Values.webhook.certificate.create -}}
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ include "hostport-allocator.certificateName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+    - {{ include "hostport-allocator.fullname" . }}.{{ .Release.Namespace }}.svc
+    - {{ include "hostport-allocator.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  {{- if .Values.webhook.certificate.issuer.create }}
+  issuerRef:
+    kind: Issuer
+    name: {{ include "hostport-allocator.certificateName" . }}
+  {{- else }}
+  issuerRef:
+    {{- toYaml .Values.webhook.certificate.issuer.ref | nindent 4 }}
+  {{- end }}
+  secretName: {{ include "hostport-allocator.certificateSecretName" . }}
+  {{- end }}

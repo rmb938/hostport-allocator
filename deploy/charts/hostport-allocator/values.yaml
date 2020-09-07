@@ -1,0 +1,100 @@
+# Default values for hostport-allocator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: docker.pkg.github.com/rmb938/hostport-allocator/hostport-allocator
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+installCrds: false
+
+rbac:
+  create: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+webhook:
+  # Use cert-manager to manage the webhook certificates
+  certificate:
+    # Allow cert manager to create the certificate
+    create: true
+    # Allow cert manager to inject the certificate into the webhook
+    inject: true
+
+    issuer:
+      create: true
+
+      # If create is false use this reference to the certificate issuer
+      ref: {}
+    #   kind: Issuer
+    #   name: selfsigned-issuer
+
+    # The name of the certificate to use.
+    # If not set a name is generated using the fullname template
+    name: ""
+
+    # The name of the secret to use.
+    # If not set a name is generated using the fullname template
+    secretName: ""
+
+  # The caBundle to use.
+  # Ignored if certificate.inject is true
+  caBundle: "bm90IHNldA==" # not set
+
+  # Configuration for the pod webhook
+  pod:
+    # The namespace selector for the pod webhook
+    # This should NOT select kubernetes system namespaces or the deployment namespace
+    namespaceSelector:
+      matchLabels:
+        hostport.rmb938.com: "true"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false
+    prometheusInstance: default
+    interval: 60s
+    scrapeTimeout: 30s
+    labels: {}
+
+resources: {}
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

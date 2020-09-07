@@ -1,0 +1,36 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "hostport-allocator.fullname" . }}-pod
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+  {{- if .Values.webhook.certificate.inject }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
+  {{- end }}
+webhooks:
+  - clientConfig:
+      {{- if .Values.webhook.certificate.create }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ .Values.webhook.caBundle }}
+      {{- end }}
+      service:
+        name: {{ include "hostport-allocator.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-v1-pod
+    failurePolicy: Fail
+    name: mpod.kb.io
+    namespaceSelector:
+      {{- toYaml .Values.webhook.pod.namespaceSelector | nindent 6 }}
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
