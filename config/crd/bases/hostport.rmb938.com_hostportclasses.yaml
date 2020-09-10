@@ -1,6 +1,6 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
@@ -8,10 +8,6 @@ metadata:
   creationTimestamp: null
   name: hostportclasses.hostport.rmb938.com
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .metadata.creationTimestamp
-    name: AGE
-    type: date
   group: hostport.rmb938.com
   names:
     kind: HostPortClass
@@ -21,57 +17,60 @@ spec:
     - hpcl
     singular: hostportclass
   scope: Cluster
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      description: HostPortClass is the Schema for the hostportclasses API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: HostPortClassSpec defines the desired state of HostPortClass
-          properties:
-            pools:
-              items:
-                properties:
-                  end:
-                    description: The end port for the pool
-                    maximum: 65535
-                    minimum: 1
-                    type: integer
-                  start:
-                    description: The start port for the pool
-                    maximum: 65535
-                    minimum: 1
-                    type: integer
-                required:
-                - end
-                - start
-                type: object
-              type: array
-          required:
-          - pools
-          type: object
-        status:
-          description: HostPortClassStatus defines the observed state of HostPortClass
-          type: object
-      type: object
-  version: v1alpha1
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: HostPortClass is the Schema for the hostportclasses API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HostPortClassSpec defines the desired state of HostPortClass
+            properties:
+              pools:
+                items:
+                  properties:
+                    end:
+                      description: The end port for the pool
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
+                    start:
+                      description: The start port for the pool
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
+                  required:
+                  - end
+                  - start
+                  type: object
+                type: array
+            required:
+            - pools
+            type: object
+          status:
+            description: HostPortClassStatus defines the observed state of HostPortClass
+            type: object
+        type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

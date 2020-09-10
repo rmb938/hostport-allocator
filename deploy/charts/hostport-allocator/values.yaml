@@ -50,8 +50,8 @@ webhook:
 
   # The caBundle to use.
   # Ignored if certificate.inject is true
-  # This value decodes to "not set"
-  caBundle: "bm90IHNldA=="
+  # This value decodes to "\n"
+  caBundle: "Cg=="
 
   # Configuration for the pod webhook
   pod:

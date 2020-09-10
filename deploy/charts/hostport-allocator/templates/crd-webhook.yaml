@@ -4,18 +4,14 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: {{ include "hostport-allocator.fullname" . }}-crd
   labels:
-    {{- include "hostport-allocator.labels" . | nindent 4 }}
+  {{- include "hostport-allocator.labels" . | nindent 4 }}
   {{- if .Values.webhook.certificate.inject }}
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
   {{- end }}
 webhooks:
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -33,11 +29,7 @@ webhooks:
         resources:
           - hostports
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -55,11 +47,7 @@ webhooks:
         resources:
           - hostportclaims
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -82,18 +70,14 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "hostport-allocator.fullname" . }}-crd
   labels:
-    {{- include "hostport-allocator.labels" . | nindent 4 }}
+  {{- include "hostport-allocator.labels" . | nindent 4 }}
   {{- if .Values.webhook.certificate.inject }}
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
   {{- end }}
 webhooks:
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -111,11 +95,7 @@ webhooks:
         resources:
           - hostports
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
@@ -133,11 +113,7 @@ webhooks:
         resources:
           - hostportclaims
   - clientConfig:
-      {{- if .Values.webhook.certificate.create }}
-      caBundle: Cg==
-      {{- else }}
       caBundle: {{ .Values.webhook.caBundle }}
-      {{- end }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
         namespace: {{ .Release.Namespace }}
