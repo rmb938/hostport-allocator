@@ -63,6 +63,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 helm-crds:
+	mkdir -p deploy/charts/hostport-allocator/templates/crds
 	go run ./tools/crd-helm/main.go
 
 # Create the kind cluster

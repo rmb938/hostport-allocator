@@ -24,8 +24,7 @@ bin
 *~
 
 # Helm Chart CRDs
-deploy/charts/hostport-allocator/templates/crds/*
-!deploy/charts/hostport-allocator/templates/crds/.gitkeep
+deploy/charts/hostport-allocator/templates/crds
 
 # kind and tilt
 kind-kubeconfig
