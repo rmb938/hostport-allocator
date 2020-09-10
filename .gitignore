@@ -23,6 +23,9 @@ bin
 *.swo
 *~
 
+# Helm Chart CRDs
+deploy/charts/hostport-allocator/templates/crds
+
 # kind and tilt
 kind-kubeconfig
 tilt.d

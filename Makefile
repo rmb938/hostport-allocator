@@ -9,7 +9,7 @@ DOCKER_IMAGE_NAME ?= hostport-allocator
 DOCKER_REPO ?= local
 DOCKER_IMAGE_TAG  ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 
-CRD_OPTIONS ?= "crd"
+CRD_OPTIONS ?= "crd:crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -61,6 +61,10 @@ vet:
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+helm-crds:
+	mkdir -p deploy/charts/hostport-allocator/templates/crds
+	go run ./tools/crd-helm/main.go
 
 # Create the kind cluster
 kind:

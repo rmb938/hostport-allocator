@@ -8,9 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Fetch history
         run: git fetch --prune --unshallow
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.14.6'
+
+      - name: Generate helm CRDs
+        run: |
+          make helm-crds
 
       - name: Run chart-testing (lint)
         id: lint
