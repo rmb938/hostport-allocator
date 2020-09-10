@@ -21,7 +21,7 @@ def deploy_baremetal_manager():
     # manager_build_path. The binary is written to .tiltbuild/manager.
     local_resource(
         "manager",
-        cmd='make manager',
+        cmd='make manager-amd64',
         deps=[
             "main.go",
             "api",
