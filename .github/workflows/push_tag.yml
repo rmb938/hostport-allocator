@@ -1,4 +1,4 @@
-name: Push Master
+name: Push Tag
 
 on:
   push:
