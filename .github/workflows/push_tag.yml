@@ -1,7 +1,9 @@
 name: Push Master
 
 on:
-  - tags
+  push:
+    tags:
+      - *
 
 jobs:
   build:
