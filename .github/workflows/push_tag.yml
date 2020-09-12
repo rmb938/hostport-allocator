@@ -1,9 +1,9 @@
-name: Push Master
+name: Push Tag
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - published
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
       - name: Build Docker Image
         env:
           DOCKER_USERNAME: ${{ github.repository_owner }}
-          TAG: ${{ github.ref }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
           make DOCKER_REPO=ghcr.io/$DOCKER_USERNAME DOCKER_IMAGE_TAG=$TAG docker
 
@@ -36,6 +36,6 @@ jobs:
       - name: Publish Docker Image
         env:
           DOCKER_USERNAME: ${{ github.repository_owner }}
-          TAG: ${{ github.ref }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
           make DOCKER_REPO=ghcr.io/$DOCKER_USERNAME DOCKER_IMAGE_TAG=$TAG docker-push
