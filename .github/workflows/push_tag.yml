@@ -56,4 +56,4 @@ jobs:
           upload_url: https://uploads.github.com/repos/ ${{ github.repository }}/releases/${{ github.event.release.tag_name }}/assets{?name,label}
           asset_path: ./bin/hostport-allocator.yaml
           asset_name: hostport-allocator.yaml
-          assent_content_type: application/yaml
+          asset_content_type: application/yaml
