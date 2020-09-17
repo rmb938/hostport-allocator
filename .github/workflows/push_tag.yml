@@ -39,3 +39,21 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           make DOCKER_REPO=ghcr.io/$DOCKER_USERNAME DOCKER_IMAGE_TAG=$TAG docker-push
+
+      - name: Package Helm and Generate Manifests
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          helm package --app-version=$TAG --version=$TAG deploy/charts/hostport-allocator -d ./bin/
+          cp deploy/manifests/01-namespace.yaml bin/hostport-allocator.yaml
+          helm template hostport-allocator-$TAG.tgz -f deploy/manifests/helm-values.yaml --namespace hostport-allocator >> bin/hostport-allocator.yaml
+
+      - name: Upload Manifests
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: https://uploads.github.com/repos/ ${{ github.repository }}/releases/${{ github.event.release.tag_name }}/assets{?name,label}
+          asset_path: ./bin/hostport-allocator.yaml
+          asset_name: hostport-allocator.yaml
+          assent_content_type: application/yaml
