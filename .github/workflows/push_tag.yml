@@ -44,6 +44,7 @@ jobs:
         env:
           TAG: ${{ github.event.release.tag_name }}
         run: |
+          make helm-crds
           helm package --app-version=$TAG --version=$TAG deploy/charts/hostport-allocator -d ./bin/
           cp deploy/manifests/01-namespace.yaml bin/hostport-allocator.yaml
           helm template ./bin/hostport-allocator-$TAG.tgz -f deploy/manifests/helm-values.yaml --namespace hostport-allocator >> bin/hostport-allocator.yaml
