@@ -70,7 +70,7 @@ func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 			return ctrl.Result{}, nil
 		}
 
-		if controllerutil.ContainsFinalizer(hpc, hostportv1alpha1.HostPortFinalizer) {
+		if controllerutil.ContainsFinalizer(hpc, hostportv1alpha1.HostPortFinalizer) == false {
 			return ctrl.Result{}, nil
 		}
 
