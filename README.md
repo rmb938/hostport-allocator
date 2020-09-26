@@ -55,7 +55,8 @@ kubectl wait -n cert-manager --for=condition=Available --timeout=300s deployment
 ### Install HostPort Allocator
 
 ```shell script
-TODO
+kubectl apply -f https://github.com/rmb938/hostport-allocator/releases/download/v0.1.3/hostport-allocator.yaml
+kubectl wait -n hostport-allocator --for=condition=Available --timeout=300s deployment hostport-allocator
 ```
 
 ### Usage
