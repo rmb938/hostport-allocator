@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
@@ -110,9 +111,18 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 			continue
 		}
 
-		if hpc.Status.Phase != hostportv1alpha1.HostPortClaimPhaseBound {
+		// if not bound and not deleting don't allow
+		// hpc can be deleting and still be usable (it won't go poof until all pods using it are gone)
+		if hpc.Status.Phase != hostportv1alpha1.HostPortClaimPhaseBound && hpc.Status.Phase != hostportv1alpha1.HostPortClaimPhaseDeleting {
 			allErrs = append(allErrs, field.Invalid(path, claimName,
 				"hostPortClaim is not bound to a host port yet"))
+			continue
+		}
+
+		// hpc doesn't have finalizer so it's about to go poof so we can't use it
+		if controllerutil.ContainsFinalizer(hpc, hostportv1alpha1.HostPortFinalizer) == false {
+			allErrs = append(allErrs, field.Invalid(path, claimName,
+				"hostPortClaim is deleting"))
 			continue
 		}
 
@@ -124,6 +134,12 @@ func (w *PodWebhook) Default(obj runtime.Object) error {
 			} else {
 				allErrs = append(allErrs, field.InternalError(path.Child("hostPort"), err))
 			}
+			continue
+		}
+
+		if hp.Status.Phase != hostportv1alpha1.HostPortPhaseAllocated {
+			allErrs = append(allErrs, field.Invalid(path.Child("hostPort"), hp.Name,
+				"hostport is not allocated a port yet"))
 			continue
 		}
 
