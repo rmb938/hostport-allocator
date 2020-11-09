@@ -1,0 +1,24 @@
+{{- if and .Values.prometheus.enabled .Values.prometheus.servicemonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "hostport-allocator.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "hostport-allocator.labels" . | nindent 4 }}
+{{- if .Values.prometheus.servicemonitor.labels }}
+{{ toYaml .Values.prometheus.servicemonitor.labels | indent 4}}
+{{- end }}
+spec:
+  jobLabel: {{ include "hostport-allocator.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "hostport-allocator.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+  - targetPort: metrics
+    interval: {{ .Values.prometheus.servicemonitor.interval }}
+    scrapeTimeout: {{ .Values.prometheus.servicemonitor.scrapeTimeout }}
+{{- end }}
