@@ -6,6 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "hostport-allocator.labels" . | nindent 4 }}
+    prometheus: {{ .Values.prometheus.servicemonitor.prometheusInstance }}
 {{- if .Values.prometheus.servicemonitor.labels }}
 {{ toYaml .Values.prometheus.servicemonitor.labels | indent 4}}
 {{- end }}
