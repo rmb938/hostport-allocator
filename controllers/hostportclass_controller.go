@@ -51,7 +51,7 @@ func (r *HostPortClassReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 
 	// If class is deleting
 	if hpcl.DeletionTimestamp.IsZero() == false {
-		if controllerutil.ContainsFinalizer(hpcl, hostportv1alpha1.HostPortFinalizer) {
+		if controllerutil.ContainsFinalizer(hpcl, hostportv1alpha1.HostPortFinalizer) == false {
 			return ctrl.Result{}, nil
 		}
 
