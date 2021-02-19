@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/go-logr/logr"
-	"github.com/prometheus/client_golang/prometheus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,27 +29,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
-
-var (
-	metricsHostPortInfo = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "hostport",
-			Name:      "hostport_port",
-			Help:      "The port allocated to the hostport",
-		},
-		[]string{"name"},
-	)
-)
-
-func init() {
-	metrics.Registry.MustRegister(metricsHostPortInfo)
-}
 
 // HostPortReconciler reconciles a HostPort object
 type HostPortReconciler struct {
@@ -72,15 +55,10 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err := r.Get(ctx, req.NamespacedName, hp)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			metricsHostPortInfo.DeleteLabelValues(req.Name)
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
 	}
-
-	metricsHostPortInfo.With(prometheus.Labels{
-		"name": hp.Name,
-	}).Set(float64(hp.Status.Port))
 
 	// if port is deleting
 	if hp.DeletionTimestamp.IsZero() == false {
