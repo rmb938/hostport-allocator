@@ -38,8 +38,7 @@ type HostPortClassReconciler struct {
 // +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclasses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclasses/status,verbs=get;update;patch
 
-func (r *HostPortClassReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *HostPortClassReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("hostportclass", req.NamespacedName)
 
 	hpcl := &hostportv1alpha1.HostPortClass{}

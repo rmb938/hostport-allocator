@@ -47,8 +47,7 @@ type HostPortReconciler struct {
 // +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostports,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostports/status,verbs=get;update;patch
 
-func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *HostPortReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("hostport", req.NamespacedName)
 
 	hp := &hostportv1alpha1.HostPort{}
@@ -200,7 +199,7 @@ func (r *HostPortReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &hostportv1alpha1.HostPort{}, "spec.hostPortClassName", func(rawObj runtime.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &hostportv1alpha1.HostPort{}, "spec.hostPortClassName", func(rawObj client.Object) []string {
 		hp := rawObj.(*hostportv1alpha1.HostPort)
 		return []string{hp.Spec.HostPortClassName}
 	}); err != nil {
@@ -209,8 +208,8 @@ func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPort{}).
-		Watches(&source.Kind{Type: &hostportv1alpha1.HostPortClaim{}}, &handler.EnqueueRequestsFromMapFunc{ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			hpc := a.Object.(*hostportv1alpha1.HostPortClaim)
+		Watches(&source.Kind{Type: &hostportv1alpha1.HostPortClaim{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+			hpc := object.(*hostportv1alpha1.HostPortClaim)
 			var req []reconcile.Request
 
 			if len(hpc.Spec.HostPortName) > 0 {
@@ -222,6 +221,6 @@ func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 
 			return req
-		})}).
+		})).
 		Complete(r)
 }
