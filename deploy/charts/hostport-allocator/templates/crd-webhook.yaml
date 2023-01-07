@@ -1,5 +1,5 @@
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ include "hostport-allocator.fullname" . }}-crd
@@ -10,7 +10,9 @@ metadata:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
   {{- end }}
 webhooks:
-  - clientConfig:
+  - admissionReviewVersions:
+        - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -28,7 +30,10 @@ webhooks:
           - UPDATE
         resources:
           - hostports
-  - clientConfig:
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -46,7 +51,10 @@ webhooks:
           - UPDATE
         resources:
           - hostportclaims
-  - clientConfig:
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -64,8 +72,9 @@ webhooks:
           - UPDATE
         resources:
           - hostportclasses
+    sideEffects: None
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "hostport-allocator.fullname" . }}-crd
@@ -76,7 +85,9 @@ metadata:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "hostport-allocator.certificateName" . }}
   {{- end }}
 webhooks:
-  - clientConfig:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -94,7 +105,10 @@ webhooks:
           - UPDATE
         resources:
           - hostports
-  - clientConfig:
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -112,7 +126,10 @@ webhooks:
           - UPDATE
         resources:
           - hostportclaims
-  - clientConfig:
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
       caBundle: {{ .Values.webhook.caBundle }}
       service:
         name: {{ include "hostport-allocator.fullname" . }}
@@ -130,3 +147,4 @@ webhooks:
           - UPDATE
         resources:
           - hostportclasses
+    sideEffects: None
