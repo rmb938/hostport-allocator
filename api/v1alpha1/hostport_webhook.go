@@ -34,7 +34,7 @@ func (r *HostPort) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostport,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostports,verbs=create;update,versions=v1alpha1,name=mhostport.kb.io
+// +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostport,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostports,verbs=create;update,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=mhostport.kb.io
 
 var _ webhook.Defaulter = &HostPort{}
 
@@ -46,7 +46,7 @@ func (r *HostPort) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostport,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostports,versions=v1alpha1,name=vhostport.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostport,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostports,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=vhostport.kb.io
 
 var _ webhook.Validator = &HostPort{}
 

@@ -48,8 +48,7 @@ type HostPortClaimReconciler struct {
 // +kubebuilder:rbac:groups=hostport.rmb938.com,resources=hostportclaims/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch
 
-func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *HostPortClaimReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("hostportclaim", req.NamespacedName)
 
 	hpc := &hostportv1alpha1.HostPortClaim{}
@@ -172,8 +171,8 @@ func (r *HostPortClaimReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPortClaim{}).
-		Watches(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestsFromMapFunc{ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			pod := a.Object.(*corev1.Pod)
+		Watches(&source.Kind{Type: &corev1.Pod{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+			pod := object.(*corev1.Pod)
 			var req []reconcile.Request
 
 			for annotation, value := range pod.Annotations {
@@ -188,9 +187,9 @@ func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 
 			return req
-		})}).
-		Watches(&source.Kind{Type: &hostportv1alpha1.HostPort{}}, &handler.EnqueueRequestsFromMapFunc{ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			hp := a.Object.(*hostportv1alpha1.HostPort)
+		})).
+		Watches(&source.Kind{Type: &hostportv1alpha1.HostPort{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+			hp := object.(*hostportv1alpha1.HostPort)
 			var req []reconcile.Request
 
 			if hp.Spec.ClaimRef != nil {
@@ -203,6 +202,6 @@ func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 
 			return req
-		})}).
+		})).
 		Complete(r)
 }
