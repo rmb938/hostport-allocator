@@ -17,10 +17,15 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -40,9 +45,12 @@ var _ webhook.Defaulter = &HostPortClaim{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *HostPortClaim) Default() {
+
 	hostportclaimlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.DeletionTimestamp.IsZero() {
+		controllerutil.AddFinalizer(r, HostPortFinalizer)
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -51,25 +59,55 @@ func (r *HostPortClaim) Default() {
 var _ webhook.Validator = &HostPortClaim{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateCreate() error {
+func (r *HostPortClaim) ValidateCreate() (admission.Warnings, error) {
+
 	hostportclaimlog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	var allErrs field.ErrorList
+
+	if len(allErrs) == 0 {
+		return nil, nil
+	}
+
+	return nil, apierrors.NewInvalid(
+		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateUpdate(old runtime.Object) error {
+func (r *HostPortClaim) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	hostportclaimlog.Info("validate update", "name", r.Name)
+	oldHPC := old.(*HostPortClaim)
 
-	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	var allErrs field.ErrorList
+
+	if r.Spec.HostPortClassName != oldHPC.Spec.HostPortClassName {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("spec").Child("hostPortClassName"),
+				"cannot change hostPortClassName"),
+		)
+	}
+
+	if len(oldHPC.Spec.HostPortName) > 0 && oldHPC.Spec.HostPortName != r.Spec.HostPortName {
+		allErrs = append(allErrs,
+			field.Forbidden(field.NewPath("spec").Child("hostPortName"),
+				"cannot change hostPortName once set"),
+		)
+	}
+
+	if len(allErrs) == 0 {
+		return nil, nil
+	}
+
+	return nil, apierrors.NewInvalid(
+		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateDelete() error {
+func (r *HostPortClaim) ValidateDelete() (admission.Warnings, error) {
 	hostportclaimlog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return nil, nil
 }

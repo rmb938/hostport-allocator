@@ -1,8 +1,10 @@
-package webhooks
+package external_webhooks
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -16,31 +18,55 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
-	"github.com/rmb938/hostport-allocator/webhook"
-	"github.com/rmb938/hostport-allocator/webhook/admission"
 )
 
 // log is for logging in this package.
 var podlog = logf.Log.WithName("pod-resource")
 
 type PodWebhook struct {
-	client client.Client
+	client  client.Client
+	decoder *admission.Decoder
 }
 
-func (w *PodWebhook) SetupWebhookWithManager(mgr ctrl.Manager) {
+func (w *PodWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	w.client = mgr.GetClient()
 	hookServer := mgr.GetWebhookServer()
 
-	hookServer.Register("/mutate-v1-pod", admission.DefaultingWebhookFor(w, &corev1.Pod{}))
+	hookServer.Register("/mutate-v1-pod", &webhook.Admission{Handler: &PodWebhook{client: mgr.GetClient(), decoder: admission.NewDecoder(mgr.GetScheme())}})
+
+	return nil
 }
 
-var _ webhook.Defaulter = &PodWebhook{}
+var _ admission.Handler = &PodWebhook{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (w *PodWebhook) Default(obj runtime.Object) error {
-	ctx := context.Background()
+func (w *PodWebhook) Handle(ctx context.Context, req admission.Request) admission.Response {
+	// Get the object in the request
+	obj := (&corev1.Pod{}).DeepCopyObject()
+	err := w.decoder.Decode(req, obj)
+	if err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+
+	// Default the object
+	err = w.Default(ctx, obj)
+	if err != nil {
+		return admission.Denied(err.Error())
+	}
+
+	marshalled, err := json.Marshal(obj)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+
+	// Create the patch
+	return admission.PatchResponseFromRaw(req.Object.Raw, marshalled)
+}
+
+func (w *PodWebhook) Default(ctx context.Context, obj runtime.Object) error {
 	r := obj.(*corev1.Pod)
 
 	podlog.Info("default", "name", r.Name, "namespace", r.Namespace)

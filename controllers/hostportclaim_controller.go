@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
@@ -171,7 +170,7 @@ func (r *HostPortClaimReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPortClaim{}).
-		Watches(&source.Kind{Type: &corev1.Pod{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+		Watches(&corev1.Pod{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 			pod := object.(*corev1.Pod)
 			var req []reconcile.Request
 
@@ -188,7 +187,7 @@ func (r *HostPortClaimReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 			return req
 		})).
-		Watches(&source.Kind{Type: &hostportv1alpha1.HostPort{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+		Watches(&hostportv1alpha1.HostPort{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 			hp := object.(*hostportv1alpha1.HostPort)
 			var req []reconcile.Request
 

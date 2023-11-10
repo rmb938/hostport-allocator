@@ -29,7 +29,8 @@ import (
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 	"github.com/rmb938/hostport-allocator/controllers"
-	"github.com/rmb938/hostport-allocator/webhooks"
+	"github.com/rmb938/hostport-allocator/external_webhooks"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -59,9 +60,10 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
+		Scheme: scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: metricsAddr,
+		},
 		HealthProbeBindAddress: healthAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "f10832af.rmb938.com",
@@ -91,7 +93,11 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPortClass")
 		os.Exit(1)
 	}
-	(&webhooks.HostPortClassWebhook{}).SetupWebhookWithManager(mgr)
+	if err = (&hostportv1alpha1.HostPortClass{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortClass")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.HostPortClaimReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("HostPortClaim"),
@@ -100,7 +106,11 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPortClaim")
 		os.Exit(1)
 	}
-	(&webhooks.HostPortClaimWebhook{}).SetupWebhookWithManager(mgr)
+	if err = (&hostportv1alpha1.HostPortClaim{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortClaim")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.HostPortReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("HostPort"),
@@ -109,8 +119,15 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPort")
 		os.Exit(1)
 	}
-	(&webhooks.HostPortWebhook{}).SetupWebhookWithManager(mgr)
-	(&webhooks.PodWebhook{}).SetupWebhookWithManager(mgr)
+	if err = (&hostportv1alpha1.HostPort{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "HostPort")
+		os.Exit(1)
+	}
+
+	if err = (&external_webhooks.PodWebhook{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Pod")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	signalHandler := ctrl.SetupSignalHandler()
