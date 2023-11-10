@@ -17,10 +17,15 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -42,7 +47,9 @@ var _ webhook.Defaulter = &HostPortClass{}
 func (r *HostPortClass) Default() {
 	hostportclasslog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.DeletionTimestamp.IsZero() {
+		controllerutil.AddFinalizer(r, HostPortFinalizer)
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -50,26 +57,56 @@ func (r *HostPortClass) Default() {
 
 var _ webhook.Validator = &HostPortClass{}
 
+func (r *HostPortClass) validatePools() field.ErrorList {
+	var allErrs field.ErrorList
+
+	for index, pool := range r.Spec.Pools {
+		if pool.Start > pool.End {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("pools").Index(index).Child("end"), pool.End,
+				"End must be greater or equal to start"))
+		}
+	}
+
+	// TODO: make sure there are no overlapping pools
+
+	return allErrs
+}
+
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateCreate() error {
+func (r *HostPortClass) ValidateCreate() (admission.Warnings, error) {
 	hostportclasslog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	allErrs := r.validatePools()
+
+	if len(allErrs) == 0 {
+		return nil, nil
+	}
+
+	return nil, apierrors.NewInvalid(
+		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateUpdate(old runtime.Object) error {
+func (r *HostPortClass) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	hostportclasslog.Info("validate update", "name", r.Name)
+	_ = old.(*HostPortClass)
 
-	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	allErrs := r.validatePools()
+
+	if len(allErrs) == 0 {
+		return nil, nil
+	}
+
+	return nil, apierrors.NewInvalid(
+		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateDelete() error {
+func (r *HostPortClass) ValidateDelete() (admission.Warnings, error) {
 	hostportclasslog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return nil, nil
 }

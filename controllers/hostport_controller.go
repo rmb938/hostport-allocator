@@ -30,7 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 )
@@ -208,7 +207,7 @@ func (r *HostPortReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&hostportv1alpha1.HostPort{}).
-		Watches(&source.Kind{Type: &hostportv1alpha1.HostPortClaim{}}, handler.EnqueueRequestsFromMapFunc(func(object client.Object) []reconcile.Request {
+		Watches(&hostportv1alpha1.HostPortClaim{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object client.Object) []reconcile.Request {
 			hpc := object.(*hostportv1alpha1.HostPortClaim)
 			var req []reconcile.Request
 
