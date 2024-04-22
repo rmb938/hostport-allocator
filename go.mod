@@ -3,7 +3,7 @@ module github.com/rmb938/hostport-allocator
 go 1.21
 
 require (
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.4.1
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.10
 	k8s.io/api v0.28.3
