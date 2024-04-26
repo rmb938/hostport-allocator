@@ -34,7 +34,7 @@ def deploy_baremetal_manager():
 
     custom_build(
         'controller',
-        'docker build -t $EXPECTED_REF .',
+        'docker build -t docker.io/$EXPECTED_IMAGE:$EXPECTED_TAG .',
         deps=[
             'bin/hostport-allocator-manager-linux-amd64',
             'Dockerfile'
@@ -54,8 +54,7 @@ def deploy_baremetal_manager():
 # the network each time.
 def deploy_cert_manager():
     registry = "quay.io/jetstack"
-    # https://github.com/jetstack/cert-manager/issues/3121
-    version = "v0.15.2"
+    version = "v1.14.5"
     images = ["cert-manager-controller", "cert-manager-cainjector", "cert-manager-webhook"]
 
     if settings.get("preload_images_for_kind"):

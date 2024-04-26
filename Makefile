@@ -76,7 +76,7 @@ kind-clean:
 
 # Run tilt
 tilt:
-	KUBECONFIG=kind-kubeconfig tilt up --hud=true --no-browser
+	KUBECONFIG=kind-kubeconfig tilt up --legacy=true
 
 # Remove tilt
 tilt-down:
