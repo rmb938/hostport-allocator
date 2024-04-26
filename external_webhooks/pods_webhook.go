@@ -29,7 +29,7 @@ var podlog = logf.Log.WithName("pod-resource")
 
 type PodWebhook struct {
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 func (w *PodWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
