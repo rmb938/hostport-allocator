@@ -5,15 +5,18 @@ on:
     types:
       - published
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.2"
+          go-version: "^1.22.5"
 
       - name: Build Manager
         run: |
@@ -27,7 +30,7 @@ jobs:
           make DOCKER_REPO=ghcr.io/$DOCKER_USERNAME DOCKER_IMAGE_TAG=$TAG docker
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -49,18 +52,7 @@ jobs:
           cp deploy/manifests/01-namespace.yaml bin/hostport-allocator.yaml
           helm template ./bin/hostport-allocator-$TAG.tgz -f deploy/manifests/helm-values.yaml --namespace hostport-allocator >> bin/hostport-allocator.yaml
 
-      - name: Get Release
-        id: get_release
-        uses: bruceadams/get-release@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Upload Manifests
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
-          asset_path: ./bin/hostport-allocator.yaml
-          asset_name: hostport-allocator.yaml
-          asset_content_type: application/yaml
+          files: ./bin/hostport-allocator.yaml
