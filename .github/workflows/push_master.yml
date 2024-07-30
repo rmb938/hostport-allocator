@@ -10,10 +10,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.2"
+          go-version: "^1.22.5"
 
       - name: Build Manager
         run: |
@@ -26,7 +26,7 @@ jobs:
           make DOCKER_REPO=ghcr.io/$DOCKER_USERNAME docker
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}

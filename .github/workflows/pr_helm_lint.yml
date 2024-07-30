@@ -7,13 +7,13 @@ jobs:
     name: Helm Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Fetch history
         run: git fetch --prune --unshallow
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.2"
+          go-version: "^1.22.5"
 
       - name: Generate helm CRDs
         run: |
@@ -21,7 +21,7 @@ jobs:
 
       - name: Run chart-testing (lint)
         id: lint
-        uses: helm/chart-testing-action@v1.0.0
+        uses: helm/chart-testing-action@v2.6.1
         with:
           command: lint
           config: ct.yaml
