@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package webhook
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/rmb938/hostport-allocator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,9 +35,11 @@ import (
 // log is for logging in this package.
 var hostportclasslog = logf.Log.WithName("hostportclass-resource")
 
-func (r *HostPortClass) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func SetupHostPortClassWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(&v1alpha1.HostPortClass{}).
+		WithValidator(&HostPortClassValidator{}).
+		WithDefaulter(&HostPortClassDefaulter{}).
 		Complete()
 }
 
@@ -41,23 +47,34 @@ func (r *HostPortClass) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportclass,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclasses,verbs=create;update,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=mhostportclass.kb.io
 
-var _ webhook.Defaulter = &HostPortClass{}
+type HostPortClassDefaulter struct{}
+
+var _ webhook.CustomDefaulter = &HostPortClassDefaulter{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *HostPortClass) Default() {
+func (d *HostPortClassDefaulter) Default(ctx context.Context, obj runtime.Object) error {
+	r, ok := obj.(*v1alpha1.HostPortClass)
+	if !ok {
+		return fmt.Errorf("expected a HostPortClassDefaulter object but got %T", obj)
+	}
+
 	hostportclasslog.Info("default", "name", r.Name)
 
 	if r.DeletionTimestamp.IsZero() {
-		controllerutil.AddFinalizer(r, HostPortFinalizer)
+		controllerutil.AddFinalizer(r, v1alpha1.HostPortFinalizer)
 	}
+
+	return nil
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 // +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportclass,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclasses,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=vhostportclass.kb.io
 
-var _ webhook.Validator = &HostPortClass{}
+type HostPortClassValidator struct{}
 
-func (r *HostPortClass) validatePools() field.ErrorList {
+var _ webhook.CustomValidator = &HostPortClassValidator{}
+
+func (d *HostPortClassValidator) validatePools(r *v1alpha1.HostPortClass) field.ErrorList {
 	var allErrs field.ErrorList
 
 	for index, pool := range r.Spec.Pools {
@@ -73,38 +90,56 @@ func (r *HostPortClass) validatePools() field.ErrorList {
 }
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateCreate() (admission.Warnings, error) {
+func (d *HostPortClassValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	r, ok := obj.(*v1alpha1.HostPortClass)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClass object but got %T", obj)
+	}
+
 	hostportclasslog.Info("validate create", "name", r.Name)
 
-	allErrs := r.validatePools()
+	allErrs := d.validatePools(r)
 
 	if len(allErrs) == 0 {
 		return nil, nil
 	}
 
 	return nil, apierrors.NewInvalid(
-		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		schema.GroupKind{Group: v1alpha1.GroupVersion.Group, Kind: r.Kind},
 		r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	hostportclasslog.Info("validate update", "name", r.Name)
-	_ = old.(*HostPortClass)
+func (d *HostPortClassValidator) ValidateUpdate(ctx context.Context, old runtime.Object, new runtime.Object) (admission.Warnings, error) {
+	r, ok := new.(*v1alpha1.HostPortClass)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClass new object but got %T", new)
+	}
 
-	allErrs := r.validatePools()
+	hostportclasslog.Info("validate update", "name", r.Name)
+	_, ok = old.(*v1alpha1.HostPortClass)
+	if !ok {
+		return nil, fmt.Errorf("expected a .HostPortClass old object but got %T", old)
+	}
+
+	allErrs := d.validatePools(r)
 
 	if len(allErrs) == 0 {
 		return nil, nil
 	}
 
 	return nil, apierrors.NewInvalid(
-		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		schema.GroupKind{Group: v1alpha1.GroupVersion.Group, Kind: r.Kind},
 		r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClass) ValidateDelete() (admission.Warnings, error) {
+func (d *HostPortClassValidator) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	r, ok := obj.(*v1alpha1.HostPortClass)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClass object but got %T", obj)
+	}
+
 	hostportclasslog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.

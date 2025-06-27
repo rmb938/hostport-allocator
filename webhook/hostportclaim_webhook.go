@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package webhook
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/rmb938/hostport-allocator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,9 +35,11 @@ import (
 // log is for logging in this package.
 var hostportclaimlog = logf.Log.WithName("hostportclaim-resource")
 
-func (r *HostPortClaim) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func SetupHostPortClaimWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(&v1alpha1.HostPortClaim{}).
+		WithValidator(&HostPortClaimValidator{}).
+		WithDefaulter(&HostPortClaimDefaulter{}).
 		Complete()
 }
 
@@ -41,25 +47,39 @@ func (r *HostPortClaim) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // +kubebuilder:webhook:path=/mutate-hostport-rmb938-com-v1alpha1-hostportclaim,mutating=true,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclaims,verbs=create;update,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=mhostportclaim.kb.io
 
-var _ webhook.Defaulter = &HostPortClaim{}
+type HostPortClaimDefaulter struct{}
+
+var _ webhook.CustomDefaulter = &HostPortClaimDefaulter{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *HostPortClaim) Default() {
+func (d *HostPortClaimDefaulter) Default(ctx context.Context, obj runtime.Object) error {
+	r, ok := obj.(*v1alpha1.HostPortClaim)
+	if !ok {
+		return fmt.Errorf("expected a HostPortClaim object but got %T", obj)
+	}
 
 	hostportclaimlog.Info("default", "name", r.Name)
 
 	if r.DeletionTimestamp.IsZero() {
-		controllerutil.AddFinalizer(r, HostPortFinalizer)
+		controllerutil.AddFinalizer(r, v1alpha1.HostPortFinalizer)
 	}
+
+	return nil
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 // +kubebuilder:webhook:verbs=create;update,path=/validate-hostport-rmb938-com-v1alpha1-hostportclaim,mutating=false,failurePolicy=fail,groups=hostport.rmb938.com,resources=hostportclaims,versions=v1alpha1,sideEffects=None,admissionReviewVersions=v1,name=vhostportclaim.kb.io
 
-var _ webhook.Validator = &HostPortClaim{}
+type HostPortClaimValidator struct{}
+
+var _ webhook.CustomValidator = &HostPortClaimValidator{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateCreate() (admission.Warnings, error) {
+func (d *HostPortClaimValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	r, ok := obj.(*v1alpha1.HostPortClaim)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClaim object but got %T", obj)
+	}
 
 	hostportclaimlog.Info("validate create", "name", r.Name)
 
@@ -70,14 +90,22 @@ func (r *HostPortClaim) ValidateCreate() (admission.Warnings, error) {
 	}
 
 	return nil, apierrors.NewInvalid(
-		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		schema.GroupKind{Group: v1alpha1.GroupVersion.Group, Kind: r.Kind},
 		r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+func (d *HostPortClaimValidator) ValidateUpdate(ctx context.Context, old runtime.Object, new runtime.Object) (admission.Warnings, error) {
+	r, ok := new.(*v1alpha1.HostPortClaim)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClaim new object but got %T", new)
+	}
+
 	hostportclaimlog.Info("validate update", "name", r.Name)
-	oldHPC := old.(*HostPortClaim)
+	oldHPC, ok := old.(*v1alpha1.HostPortClaim)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClaim old object but got %T", old)
+	}
 
 	var allErrs field.ErrorList
 
@@ -100,12 +128,17 @@ func (r *HostPortClaim) ValidateUpdate(old runtime.Object) (admission.Warnings, 
 	}
 
 	return nil, apierrors.NewInvalid(
-		schema.GroupKind{Group: GroupVersion.Group, Kind: r.Kind},
+		schema.GroupKind{Group: v1alpha1.GroupVersion.Group, Kind: r.Kind},
 		r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *HostPortClaim) ValidateDelete() (admission.Warnings, error) {
+func (d *HostPortClaimValidator) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	r, ok := obj.(*v1alpha1.HostPortClaim)
+	if !ok {
+		return nil, fmt.Errorf("expected a HostPortClaim object but got %T", obj)
+	}
+
 	hostportclaimlog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.

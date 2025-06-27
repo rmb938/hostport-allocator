@@ -1,4 +1,4 @@
-DOCKER_ARCHS ?= amd64 armv7 arm64
+DOCKER_ARCHS ?= amd64 arm64
 BUILD_DOCKER_ARCHS = $(addprefix docker-,$(DOCKER_ARCHS))
 PUSH_DOCKER_ARCHS = $(addprefix docker-push-,$(DOCKER_ARCHS))
 LATEST_DOCKER_ARCHS = $(addprefix docker-latest-,$(DOCKER_ARCHS))
@@ -86,6 +86,7 @@ tilt-down:
 docker: $(BUILD_DOCKER_ARCHS)
 $(BUILD_DOCKER_ARCHS): docker-%:
 	docker build -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" \
+		--platform linux/$* \
 		--build-arg ARCH="$*" \
 		--build-arg OS="linux" \
 		.
