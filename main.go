@@ -30,6 +30,7 @@ import (
 	hostportv1alpha1 "github.com/rmb938/hostport-allocator/api/v1alpha1"
 	"github.com/rmb938/hostport-allocator/controllers"
 	"github.com/rmb938/hostport-allocator/external_webhooks"
+	"github.com/rmb938/hostport-allocator/webhook"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	// +kubebuilder:scaffold:imports
 )
@@ -93,7 +94,8 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPortClass")
 		os.Exit(1)
 	}
-	if err = (&hostportv1alpha1.HostPortClass{}).SetupWebhookWithManager(mgr); err != nil {
+
+	if err = webhook.SetupHostPortClassWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortClass")
 		os.Exit(1)
 	}
@@ -106,7 +108,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPortClaim")
 		os.Exit(1)
 	}
-	if err = (&hostportv1alpha1.HostPortClaim{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = webhook.SetupHostPortClaimWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "HostPortClaim")
 		os.Exit(1)
 	}
@@ -119,7 +121,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "HostPort")
 		os.Exit(1)
 	}
-	if err = (&hostportv1alpha1.HostPort{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = webhook.SetupHostPortWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "HostPort")
 		os.Exit(1)
 	}
