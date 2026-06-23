@@ -30,3 +30,4 @@ deploy/charts/hostport-allocator/templates/crds
 kind-kubeconfig
 tilt.d
 tilt-settings.json
+/.vscode
