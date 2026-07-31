@@ -150,10 +150,24 @@ func (r *HostPortClaimReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		hp := &hostportv1alpha1.HostPort{}
 		err := r.Get(ctx, types.NamespacedName{Name: hpc.Spec.HostPortName}, hp)
 		if err != nil {
-			if apierrors.IsAlreadyExists(err) {
+			if apierrors.IsNotFound(err) {
 				// TODO: event saying can't find hostport
 			}
 			return ctrl.Result{}, err
+		}
+
+		// hp.Spec.ClaimRef is immutable post-creation (see hostport_webhook.go),
+		// so this can only be true if it was set at HostPort creation time -
+		// either by this reconciler's own create path above, or by an admin
+		// pre-provisioning the HostPort for this specific claim.
+		owned := hp.Spec.ClaimRef != nil &&
+			hp.Spec.ClaimRef.Namespace == hpc.Namespace &&
+			hp.Spec.ClaimRef.Name == hpc.Name &&
+			hp.Spec.ClaimRef.UID == hpc.UID
+
+		if !owned {
+			// TODO: event saying hostPortName does not belong to this claim
+			return ctrl.Result{}, nil
 		}
 
 		hpc.Status.Phase = hostportv1alpha1.HostPortClaimPhaseBound
